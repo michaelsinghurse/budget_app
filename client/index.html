@@ -11,9 +11,35 @@
     <h1>Budget App</h1>
   </header>
   <main>
-    <form>
-
-
+    <form method="post" novalidate>
+      <fieldset>
+        <legend>New Transaction</legend>
+        <label>
+          Date
+          <input type="date" name="date" />
+        </label>
+        <label>
+          Payment Source
+          <select name="source">
+            <option value="" disable selected>Choose one</option>
+            <option value="checking">Checking</option>
+            <option value="savings">Savings</option>
+          </select>
+        </label>
+        <label>
+          Category
+          <input type="text" name="category" />
+        </label>
+        <label>
+          Amount
+          <input type="number" name="amount" />
+        </label>
+        <label>
+          Notes
+          <input type="text" name="notes" />
+        </label>
+        <input type="submit" value="Add" />
+      </fieldset>
     </form>
   </main>
 </body>
