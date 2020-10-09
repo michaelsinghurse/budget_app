@@ -10,11 +10,11 @@ router.use((_req, res, next) => {
 
 // respond with all the transactions for the user
 // json object: { transactions: [{}, {}, ... {}] }
-router.get("/", (req, res, _next) => {
+router.get("/", async (req, res, _next) => {
   const store = res.locals.store;
 
   const transactions = await store.getAllTransactions();
- 
+
   res.json(transactions);
 });
 
