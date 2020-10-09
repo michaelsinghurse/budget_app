@@ -3,7 +3,7 @@
 const config = require("./lib/config");
 const express = require("express");
 const morgan = require("morgan");
-const transactions = require("./routes/transactionsRouter");
+const transactions = require("./routes/transactions");
 
 const app = express();
 
@@ -33,7 +33,7 @@ app.use("/transactions", authenticate, transactions);
 
 // error handler
 app.use((err, req, res, _next) => {
-  console.log(error);
+  console.log(err);
   res.status(500).send("Error on the server!");
 });
 
