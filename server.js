@@ -12,6 +12,10 @@ const port = config.PORT || 3000;
 app.use(morgan("dev"));
 app.use(express.static("client"));
 
+// TODO: change the argument to `express.json()` after building out the client
+// side
+app.use(express.urlencoded({ extended: true }));
+
 // extract session info
 // TODO: install sessions
 app.use((req, res, next) => {
