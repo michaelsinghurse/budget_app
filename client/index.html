@@ -14,39 +14,39 @@
     <form action="/transactions" method="post">
       <fieldset>
         <legend>New Transaction</legend>
-        <label>
-          Date
-          <input type="date" name="date" required/>
-        </label>
-        <label>
-          Payment Source
-          <select name="source" required>
-            <option value="" disable selected>Choose one</option>
-            <option value="1">Checking</option>
-            <option value="2">Savings</option>
-          </select>
-        </label>
-        <label>
-          Category
-          <select name="category" required>
-            <option value="" disable selected>Choose one</option>
-            <option value="1">Groceries</option>
-            <option value="2">Rent</option>
-            <option value="3">Electricity</option>
-            <option value="4">M/U Incentive</option>
-            <option value="5">Michael Vitamins</option>
-            <option value="6">Home Supplies</option>
-            <option value="7">Girls needs</option>
-          </select>
-        </label>
-        <label>
-          Amount
-          <input type="number" name="amount" step="0.01" required/>
-        </label>
-        <label>
-          Notes
-          <input type="text" name="notes" />
-        </label>
+        <dl>
+          <dt><label for="date">Date</label></dt>
+          <dd><input type="date" name="date" id="date" required/></dd>
+          <dt><label for="source_id">Payment Source</label></dt>
+          <dd>
+            <select name="source_id" id="source_id" required>
+              <option value="" disable selected>Choose one</option>
+              <option value="1">Checking</option>
+              <option value="2">Savings</option>
+            </select>
+          </dd>
+          <dt><label for="payee">Payee</label></dt>
+          <dd><input type="text" name="payee" id="payee" required/></dd>
+          <dt><label for="category_id">Category</label></dt>
+          <dd>
+            <select name="category_id" id="category_id" required>
+              <option value="" disable selected>Choose one</option>
+              <option value="1">Groceries</option>
+              <option value="2">Rent</option>
+              <option value="3">Electricity</option>
+              <option value="4">M/U Incentive</option>
+              <option value="5">Michael Vitamins</option>
+              <option value="6">Home Supplies</option>
+              <option value="7">Girls needs</option>
+            </select>
+          </dd>
+          <dt><label for="amount">Amount</label></dt>
+          <dd>
+            <input type="number" name="amount" id="amount" step="0.01" required/>
+          </dd>
+          <dt><label for="notes">Notes</label></dt>
+          <dd><input type="text" name="notes" id="notes" /></dd>
+        </dl>
         <input type="submit" value="Add" />
       </fieldset>
     </form>
