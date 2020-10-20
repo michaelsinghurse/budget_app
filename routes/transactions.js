@@ -15,7 +15,15 @@ router.get("/", async (req, res, _next) => {
 
   const transactions = await store.getAllTransactions();
 
-  res.json(transactions);
+  res.json({ transactions });
+});
+
+// Create a new transaction
+// TODO: validate and sanitize form input
+router.post("/", async (req, res, _next) => {
+  const store = res.locals.store;
+  const transaction = await store.addTransaction(req.body);
+  res.redirect(303, "/");
 });
 
 module.exports = router;
