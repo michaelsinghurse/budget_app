@@ -20,9 +20,12 @@ router.get("/", async (req, res, _next) => {
 
 // Create a new transaction
 // TODO: validate and sanitize form input
-router.post("/", async (req, res, _next) => {
+router.post("/", async (req, res, next) => {
   const store = res.locals.store;
-  const transaction = await store.addTransaction(req.body);
+  const success = await store.addTransaction(req.body);
+  if (!success) {
+    next(new Error("Unable to create transaction!"));
+  }
   res.redirect(303, "/");
 });
 
