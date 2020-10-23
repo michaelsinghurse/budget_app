@@ -9,30 +9,57 @@ router.use((_req, res, next) => {
 });
 
 // HTTP GET /transactions
-// respond with all the transactions for the user
-// json object: { transactions: [{}, {}, ... {}] }
-router.get("/", async (req, res, _next) => {
+// Respond with 200 (OK) on success
+// Include all transactions for user in response body
+router.get("/", async (req, res, next) => {
   const store = res.locals.store;
-
   const transactions = await store.getAllTransactions();
-
-  res.json({ transactions });
+  if (!transactions) {
+    next(new Error("Unable to get all transactions!"));
+  }
+  res.status(200).json({ transactions });
 });
+
+// HTTP GET /transactions/{id}
+// Respond with 200 (OK) on success
+// Include the transaction in the response body
+
 
 // HTTP POST /transactions
 // Create a new transaction
+// Responded with 201 (Created) on success
+// Include location header that points to /transactions/{id}
+// Include new transaction in response body
 // TODO: validate and sanitize form input
 router.post("/", async (req, res, next) => {
   const store = res.locals.store;
-  const success = await store.addTransaction(req.body);
-  if (!success) {
+  const transaction = await store.addTransaction(req.body);
+  if (!transaction) {
     next(new Error("Unable to create transaction!"));
   }
-  res.redirect(303, "/");
+  res.status(201).json(transaction);
+});
+
+// HTTP PUT /transactions/{id}
+// Edit a transaction
+// Respond with 200 (OK) on success
+// Include edited transaction in response body
+// TODO: validate and sanitize form input
+router.put("/:id", async (req, res, next) => {
+  const id = req.params.id;
+  req.body.id = id;
+  const store = res.locals.store;
+  const transaction = await store.editTransaction(req.body);
+  if (!transaction) {
+    next(new Error("Unable to edit transaction!"));
+  }
+  res.status(200).json(transaction);
 });
 
 // HTTP DELETE /transactions/{id}
+// Deletes a transaction
 // Respond with 204 (No Content) on success
+// Respond with 404 (Not Found) otherwise
 router.delete("/:id", async (req, res, next) => {
   const id = req.params.id;
   const store = res.locals.store; 
@@ -40,7 +67,7 @@ router.delete("/:id", async (req, res, next) => {
   if (!success) {
     next(new Error("Unable to delete transaction!"));
   }
-  res.redirect(204, "/");
+  res.status(204).end();
 });
 
 module.exports = router;
