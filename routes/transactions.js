@@ -47,7 +47,7 @@ router.post("/", async (req, res, next) => {
 // TODO: validate and sanitize form input
 router.put("/:id", async (req, res, next) => {
   const id = req.params.id;
-  req.body.id = id;
+  req.body.transactionId = id;
   const store = res.locals.store;
   const transaction = await store.editTransaction(req.body);
   if (!transaction) {
