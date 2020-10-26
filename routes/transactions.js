@@ -14,16 +14,26 @@ router.use((_req, res, next) => {
 router.get("/", async (req, res, next) => {
   const store = res.locals.store;
   const transactions = await store.getAllTransactions();
-  if (!transactions) {
+  if (transactions) {
+    res.status(200).json({ transactions });
+  } else {
     next(new Error("Unable to get all transactions!"));
   }
-  res.status(200).json({ transactions });
 });
 
 // HTTP GET /transactions/{id}
 // Respond with 200 (OK) on success
 // Include the transaction in the response body
-
+router.get("/:id", async (req, res, next) => {
+  const id = req.params.id;
+  const store = res.locals.store;
+  const transaction = await store.getTransactionById(id);
+  if (transaction) {
+    res.status(200).json(transaction);
+  } else {
+    next(new Error("Unable to get transaction with id = " + id));
+  }
+});
 
 // HTTP POST /transactions
 // Create a new transaction
@@ -34,10 +44,11 @@ router.get("/", async (req, res, next) => {
 router.post("/", async (req, res, next) => {
   const store = res.locals.store;
   const transaction = await store.addTransaction(req.body);
-  if (!transaction) {
+  if (transaction) {
+    res.status(201).json(transaction);
+  } else {
     next(new Error("Unable to create transaction!"));
   }
-  res.status(201).json(transaction);
 });
 
 // HTTP PUT /transactions/{id}
@@ -50,10 +61,11 @@ router.put("/:id", async (req, res, next) => {
   req.body.transactionId = id;
   const store = res.locals.store;
   const transaction = await store.editTransaction(req.body);
-  if (!transaction) {
+  if (transaction) {
+    res.status(200).json(transaction);
+  } else {
     next(new Error("Unable to edit transaction!"));
   }
-  res.status(200).json(transaction);
 });
 
 // HTTP DELETE /transactions/{id}
@@ -64,10 +76,11 @@ router.delete("/:id", async (req, res, next) => {
   const id = req.params.id;
   const store = res.locals.store; 
   const success = store.deleteTransaction(id);
-  if (!success) {
+  if (success) {
+    res.status(204).end();
+  } else {
     next(new Error("Unable to delete transaction!"));
   }
-  res.status(204).end();
 });
 
 module.exports = router;
