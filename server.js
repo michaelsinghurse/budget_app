@@ -14,6 +14,7 @@ app.use(express.static("client"));
 
 // TODO: change the argument to `express.json()` after building out the client
 // side
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // extract session info
