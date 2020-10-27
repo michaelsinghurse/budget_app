@@ -9,7 +9,9 @@ const app = express();
 
 const port = config.PORT || 3000;
 
-app.use(morgan("dev"));
+if (process.env.NODE_ENV !== "test") {
+  app.use(morgan("dev"));
+}
 app.use(express.static("client"));
 
 // TODO: change the argument to `express.json()` after building out the client
