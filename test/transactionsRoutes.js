@@ -6,7 +6,7 @@ process.env.NODE_ENV = "test";
 const app = require("../server.js");
 const request = require("supertest");
 
-let postData, transactionId;
+let transactionId;
 
 describe("GET /transactions", function() {
 
@@ -36,7 +36,7 @@ describe("GET /transactions", function() {
 });
 
 describe("POST /transactions", function() {
-  postData = {
+  const postData = {
     date: "2020-10-27",
     sourceId: 1,
     payee: "test",
@@ -61,6 +61,18 @@ describe("POST /transactions", function() {
       })
       .end(done);
   });
+
+  it("responds with 400 status code if invalid data sent", function(done) {
+    const invalidPostData = Object.assign({}, postData);
+    delete invalidPostData.date;
+
+    request(app)
+      .post("/transactions")
+      .send(invalidPostData)
+      .set("Accept", "application/json")
+      .expect(400)
+      .end(done);
+  });
 });
 
 describe("GET /transactions/{id}", function() {
@@ -82,8 +94,14 @@ describe("GET /transactions/{id}", function() {
 });
 
 describe("PUT /transactions/{id}", function() {
-  const putData = Object.assign({}, postData);
-  putData.notes = "this value has changed";
+  const putData = {
+    date: "2020-10-27",
+    sourceId: 1,
+    payee: "test",
+    categoryId: 1,
+    amount: 0.99,
+    notes: "this value has changed",
+  };
 
   it("responds with a transaction with the same id", function(done) {
     request(app)
@@ -113,6 +131,18 @@ describe("PUT /transactions/{id}", function() {
           throw new Error("Object does not have the updated value");
         }
       })
+      .end(done);
+  });
+
+  it("responds with 400 status code if invalid data sent", function(done) {
+    const invalidPutData = Object.assign({}, putData);
+    delete invalidPutData.date;
+
+    request(app)
+      .put(`/transactions/${transactionId}`)
+      .send(invalidPutData)
+      .set("Accept", "application/json")
+      .expect(400)
       .end(done);
   });
 });
