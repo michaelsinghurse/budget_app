@@ -3,6 +3,7 @@
 const config = require("./lib/config");
 const express = require("express");
 const morgan = require("morgan");
+const path = require("path");
 const transactions = require("./routes/transactions");
 
 const app = express();
@@ -12,7 +13,7 @@ const port = config.PORT || 3000;
 if (process.env.NODE_ENV !== "test") {
   app.use(morgan("dev"));
 }
-app.use(express.static("client"));
+app.use(express.static(path.join(__dirname, "client", "public")));
 
 // TODO: change the argument to `express.json()` after building out the client
 // side
