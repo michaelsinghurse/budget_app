@@ -4,52 +4,18 @@
   <meta charset="utf-8" />
   <title>Budget App</title>
   <link rel="stylesheet" href="./index.css" />
-  <script src="./index.js"></script>
 </head>
 <body>
   <header>
     <h1>Budget App</h1>
   </header>
   <main>
-    <form action="/transactions" method="post">
-      <fieldset>
-        <legend>New Transaction</legend>
-        <dl>
-          <dt><label for="date">Date</label></dt>
-          <dd><input type="date" name="date" id="date" required/></dd>
-          <dt><label for="sourceId">Payment Source</label></dt>
-          <dd>
-            <select name="sourceId" id="sourceId" required>
-              <option value="" disable selected>Choose one</option>
-              <option value="1">Checking</option>
-              <option value="2">Savings</option>
-            </select>
-          </dd>
-          <dt><label for="payee">Payee</label></dt>
-          <dd><input type="text" name="payee" id="payee" required/></dd>
-          <dt><label for="categoryId">Category</label></dt>
-          <dd>
-            <select name="categoryId" id="categoryId" required>
-              <option value="" disable selected>Choose one</option>
-              <option value="1">Groceries</option>
-              <option value="2">Rent</option>
-              <option value="3">Electricity</option>
-              <option value="4">M/U Incentive</option>
-              <option value="5">Michael Vitamins</option>
-              <option value="6">Home Supplies</option>
-              <option value="7">Girls needs</option>
-            </select>
-          </dd>
-          <dt><label for="amount">Amount</label></dt>
-          <dd>
-            <input type="number" name="amount" id="amount" step="0.01" required/>
-          </dd>
-          <dt><label for="notes">Notes</label></dt>
-          <dd><input type="text" name="notes" id="notes" /></dd>
-        </dl>
-        <input type="submit" value="Add" />
-      </fieldset>
-    </form>
+    <div id="react-root"></div>
   </main>
+  <!-- Load React. -->
+  <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="index.js"></script>
 </body>
 </html>
