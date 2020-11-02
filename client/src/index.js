@@ -1,32 +1,68 @@
+// This component is responsible for rendering the form and validating all form
+// input. If the form is submitted, it needs to validate the input and then pass
+// the submitted data back up to its parent.
 // TODO: after mounting, send get requests for a list of payment source id-name
 // pairs and a list of payment category id-name pairs. use these lists to
 // populate the select boxes.
+// TODO: handle split transactions
 class NewTransactionForm extends React.Component {
   constructor(props) {
     super(props);
+    
+    this.state = {
+      date: "",
+      sourceId: "0",
+      payee: "",
+      categoryId: "0",
+      amount: "",
+      notes: "",
+    };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  
+  handleChange(event) {
+    // TODO: validate input
+    this.setState({
+      [event.target.name]: event.target.value,
+    });
+  }
+
+  handleSubmit(event) {
+    // TODO: send form data back up to the parent
+    event.preventDefault();
   }
 
   render() {
     return (
-      <form action="/transactions" method="post">
+      <form onSubmit={this.handleSubmit}>
         <fieldset>
           <legend>New Transaction</legend>
           <dl>
             <dt><label htmlFor="date">Date</label></dt>
-            <dd><input type="date" name="date" id="date" required/></dd>
+            <dd>
+              <input type="date" name="date" id="date" 
+                value={this.state.date} onChange={this.handleChange} required/>
+            </dd>
             <dt><label htmlFor="sourceId">Payment Source</label></dt>
             <dd>
-              <select name="sourceId" id="sourceId" required defaultValue="0">
+              <select name="sourceId" id="sourceId" value={this.state.sourceId} 
+                onChange={this.handleChange} required>
                 <option value="0" disabled>Choose one</option>
                 <option value="1">Checking</option>
                 <option value="2">Savings</option>
               </select>
             </dd>
             <dt><label htmlFor="payee">Payee</label></dt>
-            <dd><input type="text" name="payee" id="payee" required/></dd>
+            <dd>
+              <input type="text" name="payee" id="payee" 
+                value={this.state.payee} onChange={this.handleChange} required/>
+            </dd>
             <dt><label htmlFor="categoryId">Category</label></dt>
             <dd>
-              <select name="categoryId" id="categoryId" required defaultValue="0" >
+              <select name="categoryId" id="categoryId" value={this.state.categoryId}
+                onChange={this.handleChange} required>
                 <option value="0" disabled >Choose one</option>
                 <option value="1">Groceries</option>
                 <option value="2">Rent</option>
@@ -39,10 +75,14 @@ class NewTransactionForm extends React.Component {
             </dd>
             <dt><label htmlFor="amount">Amount</label></dt>
             <dd>
-              <input type="number" name="amount" id="amount" step="0.01" required/>
+              <input type="number" name="amount" id="amount" step="0.01" 
+                value={this.state.amount} onChange={this.handleChange} required/>
             </dd>
             <dt><label htmlFor="notes">Notes</label></dt>
-            <dd><input type="text" name="notes" id="notes" /></dd>
+            <dd>
+              <input type="text" name="notes" id="notes" value={this.state.notes}
+                onChange={this.handleChange} />
+            </dd>
           </dl>
           <input type="submit" value="Add" />
         </fieldset>
@@ -52,19 +92,24 @@ class NewTransactionForm extends React.Component {
 }
 
 // TODO: Handle split transactions.
+// TODO: Handle "edit" button clicks. Brings up a form to edit the transaction 
 function TransactionTableRow(props) {
   const transaction = props.transaction;
+
   const formatDate = dateString => {
-    return (new Date(dateString)).toLocaleDateString(options);
+    const options = { day: "2-digit", month: "2-digit", year: "2-digit" };
+    return (new Date(dateString)).toLocaleString("en-US", options);
   };
+
   return (
     <tr>
-      <td>{formatDate(transactions.date)}</td>
+      <td>{formatDate(transaction.date)}</td>
       <td>{transaction.source}</td>
       <td>{transaction.payee}</td>
       <td>{transaction.categories[0].category}</td>
       <td>{transaction.categories[0].amount}</td>
       <td>{transaction.notes}</td>
+      <td><button type="button">Edit</button></td>
     </tr>
   );
 }
@@ -92,6 +137,7 @@ class TransactionsTable extends React.Component {
             <th>Category</th>
             <th>Amount</th>
             <th>Notes</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -107,8 +153,6 @@ class TransactionsTable extends React.Component {
 // either add the new transaction to the list of transactions maintained in
 // state or send a request for entirely new set of transactions. pass those
 // returned transactions to TransactionsTable
-// TODO: after mounting, send a request to the server for a list of
-// transactions. pass those transactions to TransactionsTable
 class Transactions extends React.Component {
   constructor(props) {
     super(props);

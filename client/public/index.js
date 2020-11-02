@@ -1,29 +1,60 @@
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+// This component is responsible for rendering the form and validating all form
+// input. If the form is submitted, it needs to validate the input and then pass
+// the submitted data back up to its parent.
 // TODO: after mounting, send get requests for a list of payment source id-name
 // pairs and a list of payment category id-name pairs. use these lists to
 // populate the select boxes.
+// TODO: handle split transactions
 var NewTransactionForm = function (_React$Component) {
   _inherits(NewTransactionForm, _React$Component);
 
   function NewTransactionForm(props) {
     _classCallCheck(this, NewTransactionForm);
 
-    return _possibleConstructorReturn(this, (NewTransactionForm.__proto__ || Object.getPrototypeOf(NewTransactionForm)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (NewTransactionForm.__proto__ || Object.getPrototypeOf(NewTransactionForm)).call(this, props));
+
+    _this.state = {
+      date: "",
+      sourceId: "0",
+      payee: "",
+      categoryId: "0",
+      amount: "",
+      notes: ""
+    };
+
+    _this.handleChange = _this.handleChange.bind(_this);
+    _this.handleSubmit = _this.handleSubmit.bind(_this);
+    return _this;
   }
 
   _createClass(NewTransactionForm, [{
+    key: "handleChange",
+    value: function handleChange(event) {
+      // TODO: validate input
+      this.setState(_defineProperty({}, event.target.name, event.target.value));
+    }
+  }, {
+    key: "handleSubmit",
+    value: function handleSubmit(event) {
+      // TODO: send form data back up to the parent
+      event.preventDefault();
+    }
+  }, {
     key: "render",
     value: function render() {
       return React.createElement(
         "form",
-        { action: "/transactions", method: "post" },
+        { onSubmit: this.handleSubmit },
         React.createElement(
           "fieldset",
           null,
@@ -47,7 +78,8 @@ var NewTransactionForm = function (_React$Component) {
             React.createElement(
               "dd",
               null,
-              React.createElement("input", { type: "date", name: "date", id: "date", required: true })
+              React.createElement("input", { type: "date", name: "date", id: "date",
+                value: this.state.date, onChange: this.handleChange, required: true })
             ),
             React.createElement(
               "dt",
@@ -63,7 +95,8 @@ var NewTransactionForm = function (_React$Component) {
               null,
               React.createElement(
                 "select",
-                { name: "sourceId", id: "sourceId", required: true, defaultValue: "0" },
+                { name: "sourceId", id: "sourceId", value: this.state.sourceId,
+                  onChange: this.handleChange, required: true },
                 React.createElement(
                   "option",
                   { value: "0", disabled: true },
@@ -93,7 +126,8 @@ var NewTransactionForm = function (_React$Component) {
             React.createElement(
               "dd",
               null,
-              React.createElement("input", { type: "text", name: "payee", id: "payee", required: true })
+              React.createElement("input", { type: "text", name: "payee", id: "payee",
+                value: this.state.payee, onChange: this.handleChange, required: true })
             ),
             React.createElement(
               "dt",
@@ -109,7 +143,8 @@ var NewTransactionForm = function (_React$Component) {
               null,
               React.createElement(
                 "select",
-                { name: "categoryId", id: "categoryId", required: true, defaultValue: "0" },
+                { name: "categoryId", id: "categoryId", value: this.state.categoryId,
+                  onChange: this.handleChange, required: true },
                 React.createElement(
                   "option",
                   { value: "0", disabled: true },
@@ -164,7 +199,8 @@ var NewTransactionForm = function (_React$Component) {
             React.createElement(
               "dd",
               null,
-              React.createElement("input", { type: "number", name: "amount", id: "amount", step: "0.01", required: true })
+              React.createElement("input", { type: "number", name: "amount", id: "amount", step: "0.01",
+                value: this.state.amount, onChange: this.handleChange, required: true })
             ),
             React.createElement(
               "dt",
@@ -178,7 +214,8 @@ var NewTransactionForm = function (_React$Component) {
             React.createElement(
               "dd",
               null,
-              React.createElement("input", { type: "text", name: "notes", id: "notes" })
+              React.createElement("input", { type: "text", name: "notes", id: "notes", value: this.state.notes,
+                onChange: this.handleChange })
             )
           ),
           React.createElement("input", { type: "submit", value: "Add" })
@@ -191,20 +228,24 @@ var NewTransactionForm = function (_React$Component) {
 }(React.Component);
 
 // TODO: Handle split transactions.
+// TODO: Handle "edit" button clicks. Brings up a form to edit the transaction 
 
 
 function TransactionTableRow(props) {
   var transaction = props.transaction;
+
   var formatDate = function formatDate(dateString) {
-    return new Date(dateString).toLocaleDateString(options);
+    var options = { day: "2-digit", month: "2-digit", year: "2-digit" };
+    return new Date(dateString).toLocaleString("en-US", options);
   };
+
   return React.createElement(
     "tr",
     null,
     React.createElement(
       "td",
       null,
-      formatDate(transactions.date)
+      formatDate(transaction.date)
     ),
     React.createElement(
       "td",
@@ -230,6 +271,15 @@ function TransactionTableRow(props) {
       "td",
       null,
       transaction.notes
+    ),
+    React.createElement(
+      "td",
+      null,
+      React.createElement(
+        "button",
+        { type: "button" },
+        "Edit"
+      )
     )
   );
 }
@@ -291,6 +341,11 @@ var TransactionsTable = function (_React$Component2) {
               "th",
               null,
               "Notes"
+            ),
+            React.createElement(
+              "th",
+              null,
+              "Action"
             )
           )
         ),
@@ -311,8 +366,6 @@ var TransactionsTable = function (_React$Component2) {
 // either add the new transaction to the list of transactions maintained in
 // state or send a request for entirely new set of transactions. pass those
 // returned transactions to TransactionsTable
-// TODO: after mounting, send a request to the server for a list of
-// transactions. pass those transactions to TransactionsTable
 
 
 var Transactions = function (_React$Component3) {
