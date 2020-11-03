@@ -16,6 +16,14 @@ class NewTransactionForm extends React.Component {
       categoryId: "0",
       amount: "",
       notes: "",
+      errors: {
+        date: "",
+        sourceId: "",
+        payee: "",
+        categoryId: "",
+        amount: "",
+        notes: "",
+      },
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -24,69 +32,161 @@ class NewTransactionForm extends React.Component {
   
   handleChange(event) {
     // TODO: validate input
+    // sourceId > 0
+    // categoryId > 0
+    // amount rounded to two decimal places
+    // length of payee string
+    // length of notes string
+    const { name, value } = event.target;
+    const errors = this.state.errors;
+
+    errors[name] = this.validateElementValue(name, value);
+
     this.setState({
-      [event.target.name]: event.target.value,
+      [name]: value,
+      errors,
     });
   }
 
   handleSubmit(event) {
-    // TODO: send form data back up to the parent
+    // TODO: validate input
     event.preventDefault();
+
+    this.props.onSubmit({
+      date: this.state.date,
+      sourceId: this.state.sourceId,
+      payee: this.state.payee,
+      categoryId: this.state.categoryId,
+      amount: this.state.amount,
+      notes: this.state.notes,
+    });
+  }
+  
+  makeErrorsListItems(errorsObject) {
+    const listItems = [];
+
+    for (let key in errorsObject) {
+      const value = errorsObject[key];
+
+      if (value) {
+        listItems.push(<li key={key}>{"\u26a0" + value}</li>);
+      }
+    }
+    return listItems;
+  }
+
+  validateElementValue(name, value) {
+    let errorMessage = "";
+    
+    switch (name) {
+      case "date":
+        errorMessage = value.length > 0 
+          ? ""
+          : "Date is required.";
+        break;
+      case "sourceId":
+        errorMessage = Number(value) > 0
+          ? ""
+          : "Payment source is required.";
+        break;
+      case "payee":
+        if (value.length === 0) {
+          errorMessage = "Payee is required.";
+        } else if (value.length > 50) {
+          errorMessage = "Payee must be 50 characters or less.";
+        }
+        break;
+      case "categoryId":
+        errorMessage = Number(value) > 0
+          ? ""
+          : "Category is required."
+        break;
+      case "amount":
+        errorMessage = value.length > 0
+          ? ""
+          : "Amount is required.";
+
+        if (Number.isNaN(Number(value))) {
+          errorMessage = "Amount must be a number.";
+        } else {
+          errorMessage = (Number(value) * 100) % 1 === 0
+            ? ""
+            : "Amount must be rounded to the cent (hundredths place).";
+        }
+
+        break;
+      case "notes":
+        errorMessage = value.length < 201 
+          ? ""
+          : "Notes must be 200 characters or less";
+        break;
+      default:
+        break;
+    }
+
+    return errorMessage;
   }
 
   render() {
+    const errorsList = this.makeErrorsListItems(this.state.errors);
+
     return (
-      <form onSubmit={this.handleSubmit}>
-        <fieldset>
-          <legend>New Transaction</legend>
-          <dl>
-            <dt><label htmlFor="date">Date</label></dt>
-            <dd>
-              <input type="date" name="date" id="date" 
-                value={this.state.date} onChange={this.handleChange} required/>
-            </dd>
-            <dt><label htmlFor="sourceId">Payment Source</label></dt>
-            <dd>
-              <select name="sourceId" id="sourceId" value={this.state.sourceId} 
-                onChange={this.handleChange} required>
-                <option value="0" disabled>Choose one</option>
-                <option value="1">Checking</option>
-                <option value="2">Savings</option>
-              </select>
-            </dd>
-            <dt><label htmlFor="payee">Payee</label></dt>
-            <dd>
-              <input type="text" name="payee" id="payee" 
-                value={this.state.payee} onChange={this.handleChange} required/>
-            </dd>
-            <dt><label htmlFor="categoryId">Category</label></dt>
-            <dd>
-              <select name="categoryId" id="categoryId" value={this.state.categoryId}
-                onChange={this.handleChange} required>
-                <option value="0" disabled >Choose one</option>
-                <option value="1">Groceries</option>
-                <option value="2">Rent</option>
-                <option value="3">Electricity</option>
-                <option value="4">M/U Incentive</option>
-                <option value="5">Michael Vitamins</option>
-                <option value="6">Home Supplies</option>
-                <option value="7">Girls needs</option>
-              </select>
-            </dd>
-            <dt><label htmlFor="amount">Amount</label></dt>
-            <dd>
-              <input type="number" name="amount" id="amount" step="0.01" 
-                value={this.state.amount} onChange={this.handleChange} required/>
-            </dd>
-            <dt><label htmlFor="notes">Notes</label></dt>
-            <dd>
-              <input type="text" name="notes" id="notes" value={this.state.notes}
-                onChange={this.handleChange} />
-            </dd>
-          </dl>
+      <div>
+        <form noValidate onSubmit={this.handleSubmit}>
+          <fieldset>
+            <legend>New Transaction</legend>
+            <dl>
+              <dt><label htmlFor="date">Date</label></dt>
+              <dd>
+                <input type="date" name="date" id="date" 
+                  value={this.state.date} onChange={this.handleChange} />
+              </dd>
+              <dt><label htmlFor="sourceId">Payment Source</label></dt>
+              <dd>
+                <select name="sourceId" id="sourceId" value={this.state.sourceId} 
+                  onChange={this.handleChange} >
+                  <option value="0" disabled>Choose one</option>
+                  <option value="1">Checking</option>
+                  <option value="2">Savings</option>
+                </select>
+              </dd>
+              <dt><label htmlFor="payee">Payee</label></dt>
+              <dd>
+                <input type="text" name="payee" id="payee" 
+                  value={this.state.payee} onChange={this.handleChange} />
+              </dd>
+              <dt><label htmlFor="categoryId">Category</label></dt>
+              <dd>
+                <select name="categoryId" id="categoryId" value={this.state.categoryId}
+                  onChange={this.handleChange} >
+                  <option value="0" disabled >Choose one</option>
+                  <option value="1">Groceries</option>
+                  <option value="2">Rent</option>
+                  <option value="3">Electricity</option>
+                  <option value="4">M/U Incentive</option>
+                  <option value="5">Michael Vitamins</option>
+                  <option value="6">Home Supplies</option>
+                  <option value="7">Girls needs</option>
+                </select>
+              </dd>
+              <dt><label htmlFor="amount">Amount</label></dt>
+              <dd>
+                <input type="number" name="amount" id="amount" step="0.01" 
+                  value={this.state.amount} onChange={this.handleChange} />
+              </dd>
+              <dt><label htmlFor="notes">Notes</label></dt>
+              <dd>
+                <input type="text" name="notes" id="notes" value={this.state.notes}
+                  onChange={this.handleChange} />
+              </dd>
+            </dl>
+          </fieldset>
           <input type="submit" value="Add" />
-        </fieldset>
-      </form>
+        </form>
+        <ul>
+          {errorsList}
+        </ul>
+      </div>
     );
   }
 }
@@ -159,6 +259,8 @@ class Transactions extends React.Component {
     this.state = {
       transactions: null,
     };
+    
+    this.handleNewTransactionSubmit = this.handleNewTransactionSubmit.bind(this);
   }
   
   componentDidMount() {
@@ -179,10 +281,15 @@ class Transactions extends React.Component {
       });
   }
 
+  handleNewTransactionSubmit(inputs) {
+    console.log("handleNewTransactionSubmit");
+    console.log(inputs);
+  }
+
   render() {
     return (
       <div>
-        <NewTransactionForm />
+        <NewTransactionForm onSubmit={this.handleNewTransactionSubmit} />
         <TransactionsTable transactions={this.state.transactions} />
       </div>
     );

@@ -29,7 +29,15 @@ var NewTransactionForm = function (_React$Component) {
       payee: "",
       categoryId: "0",
       amount: "",
-      notes: ""
+      notes: "",
+      errors: {
+        date: "",
+        sourceId: "",
+        payee: "",
+        categoryId: "",
+        amount: "",
+        notes: ""
+      }
     };
 
     _this.handleChange = _this.handleChange.bind(_this);
@@ -40,185 +48,279 @@ var NewTransactionForm = function (_React$Component) {
   _createClass(NewTransactionForm, [{
     key: "handleChange",
     value: function handleChange(event) {
+      var _setState;
+
       // TODO: validate input
-      this.setState(_defineProperty({}, event.target.name, event.target.value));
+      // sourceId > 0
+      // categoryId > 0
+      // amount rounded to two decimal places
+      // length of payee string
+      // length of notes string
+      var _event$target = event.target,
+          name = _event$target.name,
+          value = _event$target.value;
+
+      var errors = this.state.errors;
+
+      errors[name] = this.validateElementValue(name, value);
+
+      this.setState((_setState = {}, _defineProperty(_setState, name, value), _defineProperty(_setState, "errors", errors), _setState));
     }
   }, {
     key: "handleSubmit",
     value: function handleSubmit(event) {
-      // TODO: send form data back up to the parent
+      // TODO: validate input
       event.preventDefault();
+
+      this.props.onSubmit({
+        date: this.state.date,
+        sourceId: this.state.sourceId,
+        payee: this.state.payee,
+        categoryId: this.state.categoryId,
+        amount: this.state.amount,
+        notes: this.state.notes
+      });
+    }
+  }, {
+    key: "makeErrorsListItems",
+    value: function makeErrorsListItems(errorsObject) {
+      var listItems = [];
+
+      for (var key in errorsObject) {
+        var value = errorsObject[key];
+
+        if (value) {
+          listItems.push(React.createElement(
+            "li",
+            { key: key },
+            "\u26A0" + value
+          ));
+        }
+      }
+      return listItems;
+    }
+  }, {
+    key: "validateElementValue",
+    value: function validateElementValue(name, value) {
+      var errorMessage = "";
+
+      switch (name) {
+        case "date":
+          errorMessage = value.length > 0 ? "" : "Date is required.";
+          break;
+        case "sourceId":
+          errorMessage = Number(value) > 0 ? "" : "Payment source is required.";
+          break;
+        case "payee":
+          if (value.length === 0) {
+            errorMessage = "Payee is required.";
+          } else if (value.length > 50) {
+            errorMessage = "Payee must be 50 characters or less.";
+          }
+          break;
+        case "categoryId":
+          errorMessage = Number(value) > 0 ? "" : "Category is required.";
+          break;
+        case "amount":
+          errorMessage = value.length > 0 ? "" : "Amount is required.";
+
+          if (Number.isNaN(Number(value))) {
+            errorMessage = "Amount must be a number.";
+          } else {
+            errorMessage = Number(value) * 100 % 1 === 0 ? "" : "Amount must be rounded to the cent (hundredths place).";
+          }
+
+          break;
+        case "notes":
+          errorMessage = value.length < 201 ? "" : "Notes must be 200 characters or less";
+          break;
+        default:
+          break;
+      }
+
+      return errorMessage;
     }
   }, {
     key: "render",
     value: function render() {
+      var errorsList = this.makeErrorsListItems(this.state.errors);
+
       return React.createElement(
-        "form",
-        { onSubmit: this.handleSubmit },
+        "div",
+        null,
         React.createElement(
-          "fieldset",
-          null,
+          "form",
+          { noValidate: true, onSubmit: this.handleSubmit },
           React.createElement(
-            "legend",
-            null,
-            "New Transaction"
-          ),
-          React.createElement(
-            "dl",
+            "fieldset",
             null,
             React.createElement(
-              "dt",
+              "legend",
               null,
-              React.createElement(
-                "label",
-                { htmlFor: "date" },
-                "Date"
-              )
+              "New Transaction"
             ),
             React.createElement(
-              "dd",
-              null,
-              React.createElement("input", { type: "date", name: "date", id: "date",
-                value: this.state.date, onChange: this.handleChange, required: true })
-            ),
-            React.createElement(
-              "dt",
+              "dl",
               null,
               React.createElement(
-                "label",
-                { htmlFor: "sourceId" },
-                "Payment Source"
-              )
-            ),
-            React.createElement(
-              "dd",
-              null,
-              React.createElement(
-                "select",
-                { name: "sourceId", id: "sourceId", value: this.state.sourceId,
-                  onChange: this.handleChange, required: true },
+                "dt",
+                null,
                 React.createElement(
-                  "option",
-                  { value: "0", disabled: true },
-                  "Choose one"
-                ),
-                React.createElement(
-                  "option",
-                  { value: "1" },
-                  "Checking"
-                ),
-                React.createElement(
-                  "option",
-                  { value: "2" },
-                  "Savings"
+                  "label",
+                  { htmlFor: "date" },
+                  "Date"
                 )
-              )
-            ),
-            React.createElement(
-              "dt",
-              null,
+              ),
               React.createElement(
-                "label",
-                { htmlFor: "payee" },
-                "Payee"
-              )
-            ),
-            React.createElement(
-              "dd",
-              null,
-              React.createElement("input", { type: "text", name: "payee", id: "payee",
-                value: this.state.payee, onChange: this.handleChange, required: true })
-            ),
-            React.createElement(
-              "dt",
-              null,
+                "dd",
+                null,
+                React.createElement("input", { type: "date", name: "date", id: "date",
+                  value: this.state.date, onChange: this.handleChange })
+              ),
               React.createElement(
-                "label",
-                { htmlFor: "categoryId" },
-                "Category"
-              )
-            ),
-            React.createElement(
-              "dd",
-              null,
-              React.createElement(
-                "select",
-                { name: "categoryId", id: "categoryId", value: this.state.categoryId,
-                  onChange: this.handleChange, required: true },
+                "dt",
+                null,
                 React.createElement(
-                  "option",
-                  { value: "0", disabled: true },
-                  "Choose one"
-                ),
-                React.createElement(
-                  "option",
-                  { value: "1" },
-                  "Groceries"
-                ),
-                React.createElement(
-                  "option",
-                  { value: "2" },
-                  "Rent"
-                ),
-                React.createElement(
-                  "option",
-                  { value: "3" },
-                  "Electricity"
-                ),
-                React.createElement(
-                  "option",
-                  { value: "4" },
-                  "M/U Incentive"
-                ),
-                React.createElement(
-                  "option",
-                  { value: "5" },
-                  "Michael Vitamins"
-                ),
-                React.createElement(
-                  "option",
-                  { value: "6" },
-                  "Home Supplies"
-                ),
-                React.createElement(
-                  "option",
-                  { value: "7" },
-                  "Girls needs"
+                  "label",
+                  { htmlFor: "sourceId" },
+                  "Payment Source"
                 )
-              )
-            ),
-            React.createElement(
-              "dt",
-              null,
+              ),
               React.createElement(
-                "label",
-                { htmlFor: "amount" },
-                "Amount"
-              )
-            ),
-            React.createElement(
-              "dd",
-              null,
-              React.createElement("input", { type: "number", name: "amount", id: "amount", step: "0.01",
-                value: this.state.amount, onChange: this.handleChange, required: true })
-            ),
-            React.createElement(
-              "dt",
-              null,
+                "dd",
+                null,
+                React.createElement(
+                  "select",
+                  { name: "sourceId", id: "sourceId", value: this.state.sourceId,
+                    onChange: this.handleChange },
+                  React.createElement(
+                    "option",
+                    { value: "0", disabled: true },
+                    "Choose one"
+                  ),
+                  React.createElement(
+                    "option",
+                    { value: "1" },
+                    "Checking"
+                  ),
+                  React.createElement(
+                    "option",
+                    { value: "2" },
+                    "Savings"
+                  )
+                )
+              ),
               React.createElement(
-                "label",
-                { htmlFor: "notes" },
-                "Notes"
+                "dt",
+                null,
+                React.createElement(
+                  "label",
+                  { htmlFor: "payee" },
+                  "Payee"
+                )
+              ),
+              React.createElement(
+                "dd",
+                null,
+                React.createElement("input", { type: "text", name: "payee", id: "payee",
+                  value: this.state.payee, onChange: this.handleChange })
+              ),
+              React.createElement(
+                "dt",
+                null,
+                React.createElement(
+                  "label",
+                  { htmlFor: "categoryId" },
+                  "Category"
+                )
+              ),
+              React.createElement(
+                "dd",
+                null,
+                React.createElement(
+                  "select",
+                  { name: "categoryId", id: "categoryId", value: this.state.categoryId,
+                    onChange: this.handleChange },
+                  React.createElement(
+                    "option",
+                    { value: "0", disabled: true },
+                    "Choose one"
+                  ),
+                  React.createElement(
+                    "option",
+                    { value: "1" },
+                    "Groceries"
+                  ),
+                  React.createElement(
+                    "option",
+                    { value: "2" },
+                    "Rent"
+                  ),
+                  React.createElement(
+                    "option",
+                    { value: "3" },
+                    "Electricity"
+                  ),
+                  React.createElement(
+                    "option",
+                    { value: "4" },
+                    "M/U Incentive"
+                  ),
+                  React.createElement(
+                    "option",
+                    { value: "5" },
+                    "Michael Vitamins"
+                  ),
+                  React.createElement(
+                    "option",
+                    { value: "6" },
+                    "Home Supplies"
+                  ),
+                  React.createElement(
+                    "option",
+                    { value: "7" },
+                    "Girls needs"
+                  )
+                )
+              ),
+              React.createElement(
+                "dt",
+                null,
+                React.createElement(
+                  "label",
+                  { htmlFor: "amount" },
+                  "Amount"
+                )
+              ),
+              React.createElement(
+                "dd",
+                null,
+                React.createElement("input", { type: "number", name: "amount", id: "amount", step: "0.01",
+                  value: this.state.amount, onChange: this.handleChange })
+              ),
+              React.createElement(
+                "dt",
+                null,
+                React.createElement(
+                  "label",
+                  { htmlFor: "notes" },
+                  "Notes"
+                )
+              ),
+              React.createElement(
+                "dd",
+                null,
+                React.createElement("input", { type: "text", name: "notes", id: "notes", value: this.state.notes,
+                  onChange: this.handleChange })
               )
-            ),
-            React.createElement(
-              "dd",
-              null,
-              React.createElement("input", { type: "text", name: "notes", id: "notes", value: this.state.notes,
-                onChange: this.handleChange })
             )
           ),
           React.createElement("input", { type: "submit", value: "Add" })
+        ),
+        React.createElement(
+          "ul",
+          null,
+          errorsList
         )
       );
     }
@@ -379,6 +481,8 @@ var Transactions = function (_React$Component3) {
     _this3.state = {
       transactions: null
     };
+
+    _this3.handleNewTransactionSubmit = _this3.handleNewTransactionSubmit.bind(_this3);
     return _this3;
   }
 
@@ -401,12 +505,18 @@ var Transactions = function (_React$Component3) {
       });
     }
   }, {
+    key: "handleNewTransactionSubmit",
+    value: function handleNewTransactionSubmit(inputs) {
+      console.log("handleNewTransactionSubmit");
+      console.log(inputs);
+    }
+  }, {
     key: "render",
     value: function render() {
       return React.createElement(
         "div",
         null,
-        React.createElement(NewTransactionForm, null),
+        React.createElement(NewTransactionForm, { onSubmit: this.handleNewTransactionSubmit }),
         React.createElement(TransactionsTable, { transactions: this.state.transactions })
       );
     }
