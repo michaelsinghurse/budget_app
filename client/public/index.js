@@ -50,12 +50,6 @@ var NewTransactionForm = function (_React$Component) {
     value: function handleChange(event) {
       var _setState;
 
-      // TODO: validate input
-      // sourceId > 0
-      // categoryId > 0
-      // amount rounded to two decimal places
-      // length of payee string
-      // length of notes string
       var _event$target = event.target,
           name = _event$target.name,
           value = _event$target.value;
@@ -69,8 +63,25 @@ var NewTransactionForm = function (_React$Component) {
   }, {
     key: "handleSubmit",
     value: function handleSubmit(event) {
-      // TODO: validate input
       event.preventDefault();
+
+      var errors = this.state.errors;
+      var elements = event.target.elements;
+
+      for (var index = 0; index < elements.length; index += 1) {
+        var element = elements[index];
+
+        if (!this.state.hasOwnProperty(element.name)) continue;
+
+        errors[element.name] = this.validateElementValue(element.name, element.value);
+      }
+
+      if (Object.values(errors).some(function (errorMessage) {
+        return errorMessage.length > 0;
+      })) {
+        this.setState({ errors: errors });
+        return;
+      }
 
       this.props.onSubmit({
         date: this.state.date,
@@ -122,9 +133,9 @@ var NewTransactionForm = function (_React$Component) {
           errorMessage = Number(value) > 0 ? "" : "Category is required.";
           break;
         case "amount":
-          errorMessage = value.length > 0 ? "" : "Amount is required.";
-
-          if (Number.isNaN(Number(value))) {
+          if (value.length === 0) {
+            errorMessage = "Amount is required.";
+          } else if (Number.isNaN(Number(value))) {
             errorMessage = "Amount must be a number.";
           } else {
             errorMessage = Number(value) * 100 % 1 === 0 ? "" : "Amount must be rounded to the cent (hundredths place).";
@@ -489,6 +500,11 @@ var Transactions = function (_React$Component3) {
   _createClass(Transactions, [{
     key: "componentDidMount",
     value: function componentDidMount() {
+      this.fetchAllTransactions();
+    }
+  }, {
+    key: "fetchAllTransactions",
+    value: function fetchAllTransactions() {
       var _this4 = this;
 
       fetch("/transactions").then(function (response) {
@@ -507,8 +523,26 @@ var Transactions = function (_React$Component3) {
   }, {
     key: "handleNewTransactionSubmit",
     value: function handleNewTransactionSubmit(inputs) {
-      console.log("handleNewTransactionSubmit");
-      console.log(inputs);
+      var _this5 = this;
+
+      var init = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(inputs)
+      };
+
+      fetch("/transactions", init).then(function (response) {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      }).then(function (_data) {
+        return _this5.fetchAllTransactions();
+      }).catch(function (error) {
+        console.error("Problem with fetch operations:", error);
+      });
     }
   }, {
     key: "render",

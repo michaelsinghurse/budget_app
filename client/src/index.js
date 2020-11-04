@@ -31,12 +31,6 @@ class NewTransactionForm extends React.Component {
   }
   
   handleChange(event) {
-    // TODO: validate input
-    // sourceId > 0
-    // categoryId > 0
-    // amount rounded to two decimal places
-    // length of payee string
-    // length of notes string
     const { name, value } = event.target;
     const errors = this.state.errors;
 
@@ -49,8 +43,23 @@ class NewTransactionForm extends React.Component {
   }
 
   handleSubmit(event) {
-    // TODO: validate input
     event.preventDefault();
+    
+    const errors = this.state.errors;
+    const elements = event.target.elements;
+
+    for (let index = 0; index < elements.length; index += 1) {
+      const element = elements[index];
+
+      if (!this.state.hasOwnProperty(element.name)) continue;
+
+      errors[element.name] = this.validateElementValue(element.name, element.value);
+    }
+    
+    if (Object.values(errors).some(errorMessage => errorMessage.length > 0)) {
+      this.setState({ errors });
+      return;
+    }
 
     this.props.onSubmit({
       date: this.state.date,
@@ -102,11 +111,9 @@ class NewTransactionForm extends React.Component {
           : "Category is required."
         break;
       case "amount":
-        errorMessage = value.length > 0
-          ? ""
-          : "Amount is required.";
-
-        if (Number.isNaN(Number(value))) {
+        if (value.length === 0) {
+          errorMessage = "Amount is required.";
+        } else if (Number.isNaN(Number(value))) {
           errorMessage = "Amount must be a number.";
         } else {
           errorMessage = (Number(value) * 100) % 1 === 0
@@ -264,6 +271,10 @@ class Transactions extends React.Component {
   }
   
   componentDidMount() {
+    this.fetchAllTransactions();
+  }
+  
+  fetchAllTransactions() {
     fetch("/transactions")
       .then(response => {
         if (!response.ok) {
@@ -282,8 +293,25 @@ class Transactions extends React.Component {
   }
 
   handleNewTransactionSubmit(inputs) {
-    console.log("handleNewTransactionSubmit");
-    console.log(inputs);
+    const init = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(inputs),
+    };
+
+    fetch("/transactions", init)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then(_data => this.fetchAllTransactions())
+      .catch(error => {
+        console.error("Problem with fetch operations:", error);
+      });
   }
 
   render() {
