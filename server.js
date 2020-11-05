@@ -4,6 +4,7 @@ const config = require("./lib/config");
 const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
+const settings = require("./routes/settings");
 const transactions = require("./routes/transactions");
 
 const app = express();
@@ -37,6 +38,7 @@ const authenticate = (req, res, next) => {
   next();
 };
 
+app.use("/settings", authenticate, settings);
 app.use("/transactions", authenticate, transactions);
 
 // error handler
