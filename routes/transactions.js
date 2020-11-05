@@ -1,7 +1,7 @@
 "use strict";
 
 const { body, validationResult } = require("express-validator");
-const Persistence = require("../lib/persistence");
+const Persistence = require("../lib/transactionsPersistence");
 const router = require("express-promise-router")();
 
 router.use((_req, res, next) => {
