@@ -11,9 +11,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 // This component is responsible for rendering the form and validating all form
 // input. If the form is submitted, it needs to validate the input and then pass
 // the submitted data back up to its parent.
-// TODO: after mounting, send get requests for a list of payment source id-name
-// pairs and a list of payment category id-name pairs. use these lists to
-// populate the select boxes.
 // TODO: handle split transactions
 var NewTransactionForm = function (_React$Component) {
   _inherits(NewTransactionForm, _React$Component);
@@ -209,26 +206,8 @@ var NewTransactionForm = function (_React$Component) {
               React.createElement(
                 "dd",
                 null,
-                React.createElement(
-                  "select",
-                  { name: "sourceId", id: "sourceId", value: this.state.sourceId,
-                    onChange: this.handleChange },
-                  React.createElement(
-                    "option",
-                    { value: "0", disabled: true },
-                    "Choose one"
-                  ),
-                  React.createElement(
-                    "option",
-                    { value: "1" },
-                    "Checking"
-                  ),
-                  React.createElement(
-                    "option",
-                    { value: "2" },
-                    "Savings"
-                  )
-                )
+                React.createElement(SettingsSelect, { name: "sourceId", id: "sourceId", value: this.state.sourceId,
+                  onChange: this.handleChange })
               ),
               React.createElement(
                 "dt",
@@ -257,51 +236,8 @@ var NewTransactionForm = function (_React$Component) {
               React.createElement(
                 "dd",
                 null,
-                React.createElement(
-                  "select",
-                  { name: "categoryId", id: "categoryId", value: this.state.categoryId,
-                    onChange: this.handleChange },
-                  React.createElement(
-                    "option",
-                    { value: "0", disabled: true },
-                    "Choose one"
-                  ),
-                  React.createElement(
-                    "option",
-                    { value: "1" },
-                    "Groceries"
-                  ),
-                  React.createElement(
-                    "option",
-                    { value: "2" },
-                    "Rent"
-                  ),
-                  React.createElement(
-                    "option",
-                    { value: "3" },
-                    "Electricity"
-                  ),
-                  React.createElement(
-                    "option",
-                    { value: "4" },
-                    "M/U Incentive"
-                  ),
-                  React.createElement(
-                    "option",
-                    { value: "5" },
-                    "Michael Vitamins"
-                  ),
-                  React.createElement(
-                    "option",
-                    { value: "6" },
-                    "Home Supplies"
-                  ),
-                  React.createElement(
-                    "option",
-                    { value: "7" },
-                    "Girls needs"
-                  )
-                )
+                React.createElement(SettingsSelect, { name: "categoryId", id: "categoryId", value: this.state.categoryId,
+                  onChange: this.handleChange })
               ),
               React.createElement(
                 "dt",
@@ -347,6 +283,77 @@ var NewTransactionForm = function (_React$Component) {
   }]);
 
   return NewTransactionForm;
+}(React.Component);
+
+var SettingsSelect = function (_React$Component2) {
+  _inherits(SettingsSelect, _React$Component2);
+
+  function SettingsSelect(props) {
+    _classCallCheck(this, SettingsSelect);
+
+    var _this2 = _possibleConstructorReturn(this, (SettingsSelect.__proto__ || Object.getPrototypeOf(SettingsSelect)).call(this, props));
+
+    _this2.handleChange = _this2.handleChange.bind(_this2);
+    return _this2;
+  }
+
+  _createClass(SettingsSelect, [{
+    key: "handleChange",
+    value: function handleChange(event) {
+      this.props.onChange(event);
+    }
+  }, {
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var _this3 = this;
+
+      var URLS = {
+        sourceId: "/settings/paymentSources",
+        categoryId: "/settings/budgetCategories"
+      };
+
+      var url = URLS[this.props.name];
+
+      fetch(url).then(function (response) {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      }).then(function (data) {
+        _this3.populateSelectOptions(data);
+      }).catch(function (error) {
+        console.error("Problem with fetch operations:", error);
+      });
+    }
+  }, {
+    key: "populateSelectOptions",
+    value: function populateSelectOptions(data) {
+      var select = document.getElementById(this.props.id);
+
+      data.forEach(function (object) {
+        var option = document.createElement("option");
+        option.value = object.id;
+        option.appendChild(document.createTextNode(object.name));
+        select.appendChild(option);
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return React.createElement(
+        "select",
+        { name: this.props.name, id: this.props.id, value: this.props.value,
+          onChange: this.handleChange },
+        React.createElement(
+          "option",
+          { value: "0", disabled: true },
+          "Choose one"
+        )
+      );
+    }
+  }]);
+
+  return SettingsSelect;
 }(React.Component);
 
 // TODO: Handle split transactions.
@@ -406,8 +413,8 @@ function TransactionTableRow(props) {
   );
 }
 
-var TransactionsTable = function (_React$Component2) {
-  _inherits(TransactionsTable, _React$Component2);
+var TransactionsTable = function (_React$Component3) {
+  _inherits(TransactionsTable, _React$Component3);
 
   function TransactionsTable(props) {
     _classCallCheck(this, TransactionsTable);
@@ -490,20 +497,20 @@ var TransactionsTable = function (_React$Component2) {
 // returned transactions to TransactionsTable
 
 
-var Transactions = function (_React$Component3) {
-  _inherits(Transactions, _React$Component3);
+var Transactions = function (_React$Component4) {
+  _inherits(Transactions, _React$Component4);
 
   function Transactions(props) {
     _classCallCheck(this, Transactions);
 
-    var _this3 = _possibleConstructorReturn(this, (Transactions.__proto__ || Object.getPrototypeOf(Transactions)).call(this, props));
+    var _this5 = _possibleConstructorReturn(this, (Transactions.__proto__ || Object.getPrototypeOf(Transactions)).call(this, props));
 
-    _this3.state = {
+    _this5.state = {
       transactions: null
     };
 
-    _this3.handleNewTransactionSubmit = _this3.handleNewTransactionSubmit.bind(_this3);
-    return _this3;
+    _this5.handleNewTransactionSubmit = _this5.handleNewTransactionSubmit.bind(_this5);
+    return _this5;
   }
 
   _createClass(Transactions, [{
@@ -514,7 +521,7 @@ var Transactions = function (_React$Component3) {
   }, {
     key: "fetchAllTransactions",
     value: function fetchAllTransactions() {
-      var _this4 = this;
+      var _this6 = this;
 
       fetch("/transactions").then(function (response) {
         if (!response.ok) {
@@ -522,7 +529,7 @@ var Transactions = function (_React$Component3) {
         }
         return response.json();
       }).then(function (data) {
-        _this4.setState({
+        _this6.setState({
           transactions: data.transactions
         });
       }).catch(function (error) {
@@ -532,7 +539,7 @@ var Transactions = function (_React$Component3) {
   }, {
     key: "handleNewTransactionSubmit",
     value: function handleNewTransactionSubmit(inputs) {
-      var _this5 = this;
+      var _this7 = this;
 
       var init = {
         method: "POST",
@@ -548,7 +555,7 @@ var Transactions = function (_React$Component3) {
         }
         return response.json();
       }).then(function (_data) {
-        return _this5.fetchAllTransactions();
+        return _this7.fetchAllTransactions();
       }).catch(function (error) {
         console.error("Problem with fetch operations:", error);
       });

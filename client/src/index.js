@@ -1,9 +1,6 @@
 // This component is responsible for rendering the form and validating all form
 // input. If the form is submitted, it needs to validate the input and then pass
 // the submitted data back up to its parent.
-// TODO: after mounting, send get requests for a list of payment source id-name
-// pairs and a list of payment category id-name pairs. use these lists to
-// populate the select boxes.
 // TODO: handle split transactions
 class NewTransactionForm extends React.Component {
   constructor(props) {
@@ -159,12 +156,8 @@ class NewTransactionForm extends React.Component {
               </dd>
               <dt><label htmlFor="sourceId">Payment Source</label></dt>
               <dd>
-                <select name="sourceId" id="sourceId" value={this.state.sourceId} 
-                  onChange={this.handleChange} >
-                  <option value="0" disabled>Choose one</option>
-                  <option value="1">Checking</option>
-                  <option value="2">Savings</option>
-                </select>
+                <SettingsSelect name="sourceId" id="sourceId" value={this.state.sourceId}
+                  onChange={this.handleChange} />
               </dd>
               <dt><label htmlFor="payee">Payee</label></dt>
               <dd>
@@ -173,17 +166,8 @@ class NewTransactionForm extends React.Component {
               </dd>
               <dt><label htmlFor="categoryId">Category</label></dt>
               <dd>
-                <select name="categoryId" id="categoryId" value={this.state.categoryId}
-                  onChange={this.handleChange} >
-                  <option value="0" disabled >Choose one</option>
-                  <option value="1">Groceries</option>
-                  <option value="2">Rent</option>
-                  <option value="3">Electricity</option>
-                  <option value="4">M/U Incentive</option>
-                  <option value="5">Michael Vitamins</option>
-                  <option value="6">Home Supplies</option>
-                  <option value="7">Girls needs</option>
-                </select>
+                <SettingsSelect name="categoryId" id="categoryId" value={this.state.categoryId}
+                  onChange={this.handleChange} />
               </dd>
               <dt><label htmlFor="amount">Amount</label></dt>
               <dd>
@@ -203,6 +187,61 @@ class NewTransactionForm extends React.Component {
           {errorsList}
         </ul>
       </div>
+    );
+  }
+}
+
+class SettingsSelect extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(event) {
+    this.props.onChange(event);
+  }
+
+  componentDidMount() {
+    const URLS = {
+      sourceId: "/settings/paymentSources",
+      categoryId: "/settings/budgetCategories",
+    };
+
+    const url = URLS[this.props.name];
+
+    fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then(data => {
+        this.populateSelectOptions(data);
+      })
+      .catch(error => {
+        console.error("Problem with fetch operations:", error);
+      });
+  }
+
+  populateSelectOptions(data) {
+    const select = document.getElementById(this.props.id);
+
+    data.forEach(object => {
+      const option = document.createElement("option");
+      option.value = object.id;
+      option.appendChild(document.createTextNode(object.name));
+      select.appendChild(option);
+    });
+  }
+
+  render() {
+    return (
+      <select name={this.props.name} id={this.props.id} value={this.props.value} 
+        onChange={this.handleChange} >
+        <option value="0" disabled>Choose one</option>
+      </select>
     );
   }
 }
