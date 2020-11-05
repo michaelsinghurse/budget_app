@@ -91,6 +91,15 @@ var NewTransactionForm = function (_React$Component) {
         amount: this.state.amount,
         notes: this.state.notes
       });
+
+      this.setState({
+        date: "",
+        sourceId: "0",
+        payee: "",
+        categoryId: "0",
+        amount: "",
+        notes: ""
+      });
     }
   }, {
     key: "makeErrorsListItems",
