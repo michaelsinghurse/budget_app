@@ -248,30 +248,59 @@ class SettingsSelect extends React.Component {
 
 // TODO: Handle split transactions.
 // TODO: Handle "edit" button clicks. Brings up a form to edit the transaction 
-function TransactionTableRow(props) {
-  const transaction = props.transaction;
+class TransactionTableRow extends React.Component {
+  constructor(props) {
+    super(props);
+    
+    this.handleEditClick = this.handleEditClick.bind(this);
+  }
 
-  const formatDate = dateString => {
-    const options = { day: "2-digit", month: "2-digit", year: "2-digit" };
-    return (new Date(dateString)).toLocaleString("en-US", options);
-  };
+  handleEditClick(event) {
+    const transactionId = event.target.parentElement.parentElement.dataset.transactionId;
+    console.log(transactionId);
 
-  return (
-    <tr>
-      <td>{formatDate(transaction.date)}</td>
-      <td>{transaction.source}</td>
-      <td>{transaction.payee}</td>
-      <td>{transaction.categories[0].category}</td>
-      <td>{transaction.categories[0].amount}</td>
-      <td>{transaction.notes}</td>
-      <td><button type="button">Edit</button></td>
-    </tr>
-  );
+    // TODO: insert an `input` element into each `td` element in the row that was
+    // clicked on. give the `input` a value of the current text in the `td`.
+    // give it the proper `name` attribute.
+    // but how to control the component with React state and how to render
+    // errors? where will the state live?
+    // the alterative is for a modal dialog box to pop up.
+  }
+
+  render() {
+    const transaction = this.props.transaction;
+
+    const formatDate = dateString => {
+      const options = { day: "2-digit", month: "2-digit", year: "2-digit" };
+      return (new Date(dateString)).toLocaleString("en-US", options);
+    };
+
+    return (
+      <tr data-transaction-id={transaction.id}>
+        <td>{formatDate(transaction.date)}</td>
+        <td>{transaction.source}</td>
+        <td>{transaction.payee}</td>
+        <td>{transaction.categories[0].category}</td>
+        <td>{transaction.categories[0].amount}</td>
+        <td>{transaction.notes}</td>
+        <td>
+          <button type="button" onClick={this.handleEditClick}>Edit</button>
+        </td>
+      </tr>
+    );
+  }
 }
 
 class TransactionsTable extends React.Component {
   constructor(props) {
     super(props);
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+    this.props.onSubmit(event);
   }
 
   render() {
@@ -283,22 +312,25 @@ class TransactionsTable extends React.Component {
     });
 
     return (
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Source</th>
-            <th>Payee</th>
-            <th>Category</th>
-            <th>Amount</th>
-            <th>Notes</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tableRows}
-        </tbody>
-      </table>
+      <div>
+        <form id="edit-transaction" onSubmit={this.handleSubmit}></form>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Source</th>
+              <th>Payee</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Notes</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tableRows}
+          </tbody>
+        </table>
+      </div>
     );
   }
 }
@@ -315,6 +347,7 @@ class Transactions extends React.Component {
       transactions: null,
     };
     
+    this.handleEditTransactionSubmit = this.handleEditTransactionSubmit.bind(this);
     this.handleNewTransactionSubmit = this.handleNewTransactionSubmit.bind(this);
   }
   
@@ -338,6 +371,12 @@ class Transactions extends React.Component {
       .catch(error => {
         console.error("Problem with fetch operations:", error);
       });
+  }
+
+  handleEditTransactionSubmit(inputs) {
+    console.log("hello from Transactions component");
+    console.log("inside `handleEditTransactionsSubmit` method");
+    console.log("inputs:", inputs);
   }
 
   handleNewTransactionSubmit(inputs) {
@@ -366,7 +405,8 @@ class Transactions extends React.Component {
     return (
       <div>
         <NewTransactionForm onSubmit={this.handleNewTransactionSubmit} />
-        <TransactionsTable transactions={this.state.transactions} />
+        <TransactionsTable onSubmit={this.handleEditTransactionSubmit}
+          transactions={this.state.transactions} />
       </div>
     );
   }

@@ -360,69 +360,109 @@ var SettingsSelect = function (_React$Component2) {
 // TODO: Handle "edit" button clicks. Brings up a form to edit the transaction 
 
 
-function TransactionTableRow(props) {
-  var transaction = props.transaction;
+var TransactionTableRow = function (_React$Component3) {
+  _inherits(TransactionTableRow, _React$Component3);
 
-  var formatDate = function formatDate(dateString) {
-    var options = { day: "2-digit", month: "2-digit", year: "2-digit" };
-    return new Date(dateString).toLocaleString("en-US", options);
-  };
+  function TransactionTableRow(props) {
+    _classCallCheck(this, TransactionTableRow);
 
-  return React.createElement(
-    "tr",
-    null,
-    React.createElement(
-      "td",
-      null,
-      formatDate(transaction.date)
-    ),
-    React.createElement(
-      "td",
-      null,
-      transaction.source
-    ),
-    React.createElement(
-      "td",
-      null,
-      transaction.payee
-    ),
-    React.createElement(
-      "td",
-      null,
-      transaction.categories[0].category
-    ),
-    React.createElement(
-      "td",
-      null,
-      transaction.categories[0].amount
-    ),
-    React.createElement(
-      "td",
-      null,
-      transaction.notes
-    ),
-    React.createElement(
-      "td",
-      null,
-      React.createElement(
-        "button",
-        { type: "button" },
-        "Edit"
-      )
-    )
-  );
-}
+    var _this4 = _possibleConstructorReturn(this, (TransactionTableRow.__proto__ || Object.getPrototypeOf(TransactionTableRow)).call(this, props));
 
-var TransactionsTable = function (_React$Component3) {
-  _inherits(TransactionsTable, _React$Component3);
+    _this4.handleEditClick = _this4.handleEditClick.bind(_this4);
+    return _this4;
+  }
+
+  _createClass(TransactionTableRow, [{
+    key: "handleEditClick",
+    value: function handleEditClick(event) {
+      var transactionId = event.target.parentElement.parentElement.dataset.transactionId;
+      console.log(transactionId);
+
+      // TODO: insert an `input` element into each `td` element in the row that was
+      // clicked on. give the `input` a value of the current text in the `td`.
+      // give it the proper `name` attribute.
+      // but how to control the component with React state and how to render
+      // errors? where will the state live?
+      // the alterative is for a modal dialog box to pop up.
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var transaction = this.props.transaction;
+
+      var formatDate = function formatDate(dateString) {
+        var options = { day: "2-digit", month: "2-digit", year: "2-digit" };
+        return new Date(dateString).toLocaleString("en-US", options);
+      };
+
+      return React.createElement(
+        "tr",
+        { "data-transaction-id": transaction.id },
+        React.createElement(
+          "td",
+          null,
+          formatDate(transaction.date)
+        ),
+        React.createElement(
+          "td",
+          null,
+          transaction.source
+        ),
+        React.createElement(
+          "td",
+          null,
+          transaction.payee
+        ),
+        React.createElement(
+          "td",
+          null,
+          transaction.categories[0].category
+        ),
+        React.createElement(
+          "td",
+          null,
+          transaction.categories[0].amount
+        ),
+        React.createElement(
+          "td",
+          null,
+          transaction.notes
+        ),
+        React.createElement(
+          "td",
+          null,
+          React.createElement(
+            "button",
+            { type: "button", onClick: this.handleEditClick },
+            "Edit"
+          )
+        )
+      );
+    }
+  }]);
+
+  return TransactionTableRow;
+}(React.Component);
+
+var TransactionsTable = function (_React$Component4) {
+  _inherits(TransactionsTable, _React$Component4);
 
   function TransactionsTable(props) {
     _classCallCheck(this, TransactionsTable);
 
-    return _possibleConstructorReturn(this, (TransactionsTable.__proto__ || Object.getPrototypeOf(TransactionsTable)).call(this, props));
+    var _this5 = _possibleConstructorReturn(this, (TransactionsTable.__proto__ || Object.getPrototypeOf(TransactionsTable)).call(this, props));
+
+    _this5.handleSubmit = _this5.handleSubmit.bind(_this5);
+    return _this5;
   }
 
   _createClass(TransactionsTable, [{
+    key: "handleSubmit",
+    value: function handleSubmit(event) {
+      event.preventDefault();
+      this.props.onSubmit(event);
+    }
+  }, {
     key: "render",
     value: function render() {
       var transactions = this.props.transactions || [];
@@ -433,55 +473,60 @@ var TransactionsTable = function (_React$Component3) {
       });
 
       return React.createElement(
-        "table",
+        "div",
         null,
+        React.createElement("form", { id: "edit-transaction", onSubmit: this.handleSubmit }),
         React.createElement(
-          "thead",
+          "table",
           null,
           React.createElement(
-            "tr",
+            "thead",
             null,
             React.createElement(
-              "th",
+              "tr",
               null,
-              "Date"
-            ),
-            React.createElement(
-              "th",
-              null,
-              "Source"
-            ),
-            React.createElement(
-              "th",
-              null,
-              "Payee"
-            ),
-            React.createElement(
-              "th",
-              null,
-              "Category"
-            ),
-            React.createElement(
-              "th",
-              null,
-              "Amount"
-            ),
-            React.createElement(
-              "th",
-              null,
-              "Notes"
-            ),
-            React.createElement(
-              "th",
-              null,
-              "Action"
+              React.createElement(
+                "th",
+                null,
+                "Date"
+              ),
+              React.createElement(
+                "th",
+                null,
+                "Source"
+              ),
+              React.createElement(
+                "th",
+                null,
+                "Payee"
+              ),
+              React.createElement(
+                "th",
+                null,
+                "Category"
+              ),
+              React.createElement(
+                "th",
+                null,
+                "Amount"
+              ),
+              React.createElement(
+                "th",
+                null,
+                "Notes"
+              ),
+              React.createElement(
+                "th",
+                null,
+                "Action"
+              )
             )
+          ),
+          React.createElement(
+            "tbody",
+            null,
+            tableRows
           )
-        ),
-        React.createElement(
-          "tbody",
-          null,
-          tableRows
         )
       );
     }
@@ -497,20 +542,21 @@ var TransactionsTable = function (_React$Component3) {
 // returned transactions to TransactionsTable
 
 
-var Transactions = function (_React$Component4) {
-  _inherits(Transactions, _React$Component4);
+var Transactions = function (_React$Component5) {
+  _inherits(Transactions, _React$Component5);
 
   function Transactions(props) {
     _classCallCheck(this, Transactions);
 
-    var _this5 = _possibleConstructorReturn(this, (Transactions.__proto__ || Object.getPrototypeOf(Transactions)).call(this, props));
+    var _this6 = _possibleConstructorReturn(this, (Transactions.__proto__ || Object.getPrototypeOf(Transactions)).call(this, props));
 
-    _this5.state = {
+    _this6.state = {
       transactions: null
     };
 
-    _this5.handleNewTransactionSubmit = _this5.handleNewTransactionSubmit.bind(_this5);
-    return _this5;
+    _this6.handleEditTransactionSubmit = _this6.handleEditTransactionSubmit.bind(_this6);
+    _this6.handleNewTransactionSubmit = _this6.handleNewTransactionSubmit.bind(_this6);
+    return _this6;
   }
 
   _createClass(Transactions, [{
@@ -521,7 +567,7 @@ var Transactions = function (_React$Component4) {
   }, {
     key: "fetchAllTransactions",
     value: function fetchAllTransactions() {
-      var _this6 = this;
+      var _this7 = this;
 
       fetch("/transactions").then(function (response) {
         if (!response.ok) {
@@ -529,7 +575,7 @@ var Transactions = function (_React$Component4) {
         }
         return response.json();
       }).then(function (data) {
-        _this6.setState({
+        _this7.setState({
           transactions: data.transactions
         });
       }).catch(function (error) {
@@ -537,9 +583,16 @@ var Transactions = function (_React$Component4) {
       });
     }
   }, {
+    key: "handleEditTransactionSubmit",
+    value: function handleEditTransactionSubmit(inputs) {
+      console.log("hello from Transactions component");
+      console.log("inside `handleEditTransactionsSubmit` method");
+      console.log("inputs:", inputs);
+    }
+  }, {
     key: "handleNewTransactionSubmit",
     value: function handleNewTransactionSubmit(inputs) {
-      var _this7 = this;
+      var _this8 = this;
 
       var init = {
         method: "POST",
@@ -555,7 +608,7 @@ var Transactions = function (_React$Component4) {
         }
         return response.json();
       }).then(function (_data) {
-        return _this7.fetchAllTransactions();
+        return _this8.fetchAllTransactions();
       }).catch(function (error) {
         console.error("Problem with fetch operations:", error);
       });
@@ -567,7 +620,8 @@ var Transactions = function (_React$Component4) {
         "div",
         null,
         React.createElement(NewTransactionForm, { onSubmit: this.handleNewTransactionSubmit }),
-        React.createElement(TransactionsTable, { transactions: this.state.transactions })
+        React.createElement(TransactionsTable, { onSubmit: this.handleEditTransactionSubmit,
+          transactions: this.state.transactions })
       );
     }
   }]);
