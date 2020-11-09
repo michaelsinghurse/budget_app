@@ -335,11 +335,6 @@ class TransactionsTable extends React.Component {
   }
 }
 
-// TODO: pass an on submit handler to the NewTransactionForm. the handler should
-// submit the new transaction to the server and handle the response. on success,
-// either add the new transaction to the list of transactions maintained in
-// state or send a request for entirely new set of transactions. pass those
-// returned transactions to TransactionsTable
 class Transactions extends React.Component {
   constructor(props) {
     super(props);
