@@ -40,8 +40,12 @@ describe("POST /transactions", function() {
     date: "2020-10-27",
     sourceId: 1,
     payee: "test",
-    categoryId: 1,
-    amount: 0.99,
+    categories: [
+      { 
+        categoryId: 1, 
+        amount: 0.99,
+      },
+    ],
     notes: "",
   };
 
@@ -98,8 +102,12 @@ describe("PUT /transactions/{id}", function() {
     date: "2020-10-27",
     sourceId: 1,
     payee: "test",
-    categoryId: 1,
-    amount: 0.99,
+    categories: [
+      {
+        categoryId: 1,
+        amount: 0.99,
+      },
+    ],
     notes: "this value has changed",
   };
 
