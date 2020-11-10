@@ -1,6 +1,6 @@
 "use strict";
 
-const { body, validationResult } = require("express-validator");
+const { body, param, validationResult } = require("express-validator");
 const Persistence = require("../lib/transactionsPersistence");
 const router = require("express-promise-router")();
 
@@ -25,7 +25,14 @@ router.get("/", async (req, res, next) => {
 // HTTP GET /transactions/{id}
 // Respond with 200 (OK) on success
 // Include the transaction in the response body
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", [
+  param("id").isInt().withMessage("must be an integer"),
+], async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const id = req.params.id;
   const store = res.locals.store;
   const transaction = await store.getTransactionById(id);
@@ -44,12 +51,22 @@ router.get("/:id", async (req, res, next) => {
 router.post("/", [
   body("date").isDate().withMessage("must be a date string"),
   body("sourceId").isInt().withMessage("must be an integer"),
-  body("categoryId").isInt().withMessage("must be an integer"),
   body("payee")
-    .trim().escape()
+    .trim()
     .isLength({ min: 1, max: 50 })
     .withMessage("must be between 1 and 50 characters"),
-  body("amount").isCurrency().withMessage("must be currency"),
+  body("categories")
+    .isArray({ min: 1 })
+    .withMessage("must be an array with at least one element"),
+  body("categories").custom(array => {
+    if (array.some(category => Number.isNaN(Number(category.categoryId)))) {
+      throw new Error("categories.categoryId is required and must be a number");
+    }
+    if (array.some(category => Number.isNaN(Number(category.amount)))) {
+      throw new Error("categories.amount is required and must be a number");
+    }
+    return true;
+  }),
   body("notes").trim().escape(),
 ], async (req, res, next) => {
   const errors = validationResult(req);
@@ -71,14 +88,25 @@ router.post("/", [
 // Respond with 200 (OK) on success
 // Include edited transaction in response body
 router.put("/:id", [
+  param("id").isInt().withMessage("must be an integer"),  
   body("date").isDate().withMessage("must be a date string"),
   body("sourceId").isInt().withMessage("must be an integer"),
-  body("categoryId").isInt().withMessage("must be an integer"),
   body("payee")
-    .trim().escape()
+    .trim()
     .isLength({ min: 1, max: 50 })
     .withMessage("must be between 1 and 50 characters"),
-  body("amount").isCurrency().withMessage("must be currency"),
+  body("categories")
+    .isArray({ min: 1 })
+    .withMessage("must be an array with at least one element"),
+  body("categories").custom(array => {
+    if (array.some(category => Number.isNaN(Number(category.categoryId)))) {
+      throw new Error("categories.categoryId is required and must be a number");
+    }
+    if (array.some(category => Number.isNaN(Number(category.amount)))) {
+      throw new Error("categories.amount is required and must be a number");
+    }
+    return true;
+  }),
   body("notes").trim().escape(),
 ], async (req, res, next) => {
   const errors = validationResult(req);
@@ -101,7 +129,14 @@ router.put("/:id", [
 // Deletes a transaction
 // Respond with 204 (No Content) on success
 // Respond with 404 (Not Found) otherwise
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", [
+  param("id").isInt().withMessage("must be an integer"),
+], async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const id = req.params.id;
   const store = res.locals.store; 
   const success = store.deleteTransaction(id);
