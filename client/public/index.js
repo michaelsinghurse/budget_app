@@ -8,10 +8,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-// This component is responsible for rendering the form and validating all form
-// input. If the form is submitted, it needs to validate the input and then pass
-// the submitted data back up to its parent.
-// TODO: handle split transactions
+// TODO: re-write html of the form so that category and amount are horizontally
+// next to each other. add a button to split transaction.
+// TODO: handle split button click. add another category-amount pair. add a
+// button to add another split or to remove the current split.
 var NewTransactionForm = function (_React$Component) {
   _inherits(NewTransactionForm, _React$Component);
 
@@ -24,8 +24,10 @@ var NewTransactionForm = function (_React$Component) {
       date: "",
       sourceId: "0",
       payee: "",
-      categoryId: "0",
-      amount: "",
+      categories: [{
+        categoryId: "0",
+        amount: ""
+      }],
       notes: "",
       errors: {
         date: "",
@@ -45,8 +47,6 @@ var NewTransactionForm = function (_React$Component) {
   _createClass(NewTransactionForm, [{
     key: "handleChange",
     value: function handleChange(event) {
-      var _setState;
-
       var _event$target = event.target,
           name = _event$target.name,
           value = _event$target.value;
@@ -55,7 +55,19 @@ var NewTransactionForm = function (_React$Component) {
 
       errors[name] = this.validateElementValue(name, value);
 
-      this.setState((_setState = {}, _defineProperty(_setState, name, value), _defineProperty(_setState, "errors", errors), _setState));
+      if (name === "categoryId" || name === "amount") {
+        var categories = this.state.categories;
+        categories[0][name] = value;
+
+        this.setState({
+          categories: categories,
+          errors: errors
+        });
+      } else {
+        var _setState;
+
+        this.setState((_setState = {}, _defineProperty(_setState, name, value), _defineProperty(_setState, "errors", errors), _setState));
+      }
     }
   }, {
     key: "handleSubmit",
@@ -68,7 +80,9 @@ var NewTransactionForm = function (_React$Component) {
       for (var index = 0; index < elements.length; index += 1) {
         var element = elements[index];
 
-        if (!this.state.hasOwnProperty(element.name)) continue;
+        if (!this.state.hasOwnProperty(element.name) && !this.state.categories.hasOwnProperty(element.name)) {
+          continue;
+        }
 
         errors[element.name] = this.validateElementValue(element.name, element.value);
       }
@@ -84,8 +98,10 @@ var NewTransactionForm = function (_React$Component) {
         date: this.state.date,
         sourceId: this.state.sourceId,
         payee: this.state.payee,
-        categoryId: this.state.categoryId,
-        amount: this.state.amount,
+        categories: [{
+          categoryId: this.state.categories[0].categoryId,
+          amount: this.state.categories[0].amount
+        }],
         notes: this.state.notes
       });
 
@@ -93,8 +109,10 @@ var NewTransactionForm = function (_React$Component) {
         date: "",
         sourceId: "0",
         payee: "",
-        categoryId: "0",
-        amount: "",
+        categories: [{
+          categoryId: "0",
+          amount: ""
+        }],
         notes: ""
       });
     }
@@ -236,7 +254,8 @@ var NewTransactionForm = function (_React$Component) {
               React.createElement(
                 "dd",
                 null,
-                React.createElement(SettingsSelect, { name: "categoryId", id: "categoryId", value: this.state.categoryId,
+                React.createElement(SettingsSelect, { name: "categoryId", id: "categoryId",
+                  value: this.state.categories[0].categoryId,
                   onChange: this.handleChange })
               ),
               React.createElement(
@@ -252,7 +271,8 @@ var NewTransactionForm = function (_React$Component) {
                 "dd",
                 null,
                 React.createElement("input", { type: "number", name: "amount", id: "amount", step: "0.01",
-                  value: this.state.amount, onChange: this.handleChange })
+                  value: this.state.categories[0].amount,
+                  onChange: this.handleChange })
               ),
               React.createElement(
                 "dt",
@@ -356,7 +376,7 @@ var SettingsSelect = function (_React$Component2) {
   return SettingsSelect;
 }(React.Component);
 
-// TODO: Handle split transactions.
+// TODO: Add button to show split transaction categories and amounts.
 // TODO: Handle "edit" button clicks. Brings up a form to edit the transaction 
 
 
@@ -395,6 +415,13 @@ var TransactionTableRow = function (_React$Component3) {
         return new Date(dateString).toLocaleString("en-US", options);
       };
 
+      var category = transaction.categories.length > 1 ? "SPLIT" : transaction.categories[0].category;
+
+      var amount = transaction.categories.length > 1 ? transaction.categories.reduce(function (sum, category) {
+        sum += Number(category.amount);
+        return sum;
+      }, 0) : transaction.categories[0].amount;
+
       return React.createElement(
         "tr",
         { "data-transaction-id": transaction.id },
@@ -416,12 +443,12 @@ var TransactionTableRow = function (_React$Component3) {
         React.createElement(
           "td",
           null,
-          transaction.categories[0].category
+          category
         ),
         React.createElement(
           "td",
           null,
-          transaction.categories[0].amount
+          amount
         ),
         React.createElement(
           "td",

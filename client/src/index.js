@@ -1,7 +1,7 @@
-// This component is responsible for rendering the form and validating all form
-// input. If the form is submitted, it needs to validate the input and then pass
-// the submitted data back up to its parent.
-// TODO: handle split transactions
+// TODO: re-write html of the form so that category and amount are horizontally
+// next to each other. add a button to split transaction.
+// TODO: handle split button click. add another category-amount pair. add a
+// button to add another split or to remove the current split.
 class NewTransactionForm extends React.Component {
   constructor(props) {
     super(props);
@@ -10,8 +10,10 @@ class NewTransactionForm extends React.Component {
       date: "",
       sourceId: "0",
       payee: "",
-      categoryId: "0",
-      amount: "",
+      categories: [{
+        categoryId: "0",
+        amount: "",
+      }],
       notes: "",
       errors: {
         date: "",
@@ -33,10 +35,20 @@ class NewTransactionForm extends React.Component {
 
     errors[name] = this.validateElementValue(name, value);
 
-    this.setState({
-      [name]: value,
-      errors,
-    });
+    if (name === "categoryId" || name === "amount") {
+      const categories = this.state.categories;
+      categories[0][name] = value;
+      
+      this.setState({
+        categories,   
+        errors,
+      });
+    } else {
+      this.setState({
+        [name]: value,
+        errors,
+      });
+    }
   }
 
   handleSubmit(event) {
@@ -48,7 +60,12 @@ class NewTransactionForm extends React.Component {
     for (let index = 0; index < elements.length; index += 1) {
       const element = elements[index];
 
-      if (!this.state.hasOwnProperty(element.name)) continue;
+      if (
+        !this.state.hasOwnProperty(element.name) && 
+        !this.state.categories.hasOwnProperty(element.name)
+      ) {
+        continue;
+      }
 
       errors[element.name] = this.validateElementValue(element.name, element.value);
     }
@@ -62,8 +79,10 @@ class NewTransactionForm extends React.Component {
       date: this.state.date,
       sourceId: this.state.sourceId,
       payee: this.state.payee,
-      categoryId: this.state.categoryId,
-      amount: this.state.amount,
+      categories: [{
+        categoryId: this.state.categories[0].categoryId,
+        amount: this.state.categories[0].amount,
+      }],
       notes: this.state.notes,
     });
 
@@ -71,8 +90,10 @@ class NewTransactionForm extends React.Component {
       date: "",
       sourceId: "0",
       payee: "",
-      categoryId: "0",
-      amount: "",
+      categories: [{
+        categoryId: "0",
+        amount: "",
+      }],
       notes: "",
     });
   }
@@ -166,13 +187,15 @@ class NewTransactionForm extends React.Component {
               </dd>
               <dt><label htmlFor="categoryId">Category</label></dt>
               <dd>
-                <SettingsSelect name="categoryId" id="categoryId" value={this.state.categoryId}
+                <SettingsSelect name="categoryId" id="categoryId" 
+                  value={this.state.categories[0].categoryId}
                   onChange={this.handleChange} />
               </dd>
               <dt><label htmlFor="amount">Amount</label></dt>
               <dd>
                 <input type="number" name="amount" id="amount" step="0.01" 
-                  value={this.state.amount} onChange={this.handleChange} />
+                  value={this.state.categories[0].amount} 
+                  onChange={this.handleChange} />
               </dd>
               <dt><label htmlFor="notes">Notes</label></dt>
               <dd>
@@ -246,7 +269,7 @@ class SettingsSelect extends React.Component {
   }
 }
 
-// TODO: Handle split transactions.
+// TODO: Add button to show split transaction categories and amounts.
 // TODO: Handle "edit" button clicks. Brings up a form to edit the transaction 
 class TransactionTableRow extends React.Component {
   constructor(props) {
@@ -274,14 +297,25 @@ class TransactionTableRow extends React.Component {
       const options = { day: "2-digit", month: "2-digit", year: "2-digit" };
       return (new Date(dateString)).toLocaleString("en-US", options);
     };
+    
+    const category = transaction.categories.length > 1
+      ? "SPLIT"
+      : transaction.categories[0].category;
+
+    const amount = transaction.categories.length > 1
+      ? transaction.categories.reduce((sum, category) => {
+          sum += Number(category.amount);
+          return sum;
+        }, 0)
+      : transaction.categories[0].amount;
 
     return (
       <tr data-transaction-id={transaction.id}>
         <td>{formatDate(transaction.date)}</td>
         <td>{transaction.source}</td>
         <td>{transaction.payee}</td>
-        <td>{transaction.categories[0].category}</td>
-        <td>{transaction.categories[0].amount}</td>
+        <td>{category}</td>
+        <td>{amount}</td>
         <td>{transaction.notes}</td>
         <td>
           <button type="button" onClick={this.handleEditClick}>Edit</button>
