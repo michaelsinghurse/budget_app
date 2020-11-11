@@ -373,6 +373,7 @@ class Transactions extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoaded: false,
       transactions: null,
     };
     
@@ -394,6 +395,7 @@ class Transactions extends React.Component {
       })
       .then(data => {
         this.setState({
+          isLoaded: true,
           transactions: data.transactions,
         });
       })
@@ -434,8 +436,13 @@ class Transactions extends React.Component {
     return (
       <div>
         <NewTransactionForm onSubmit={this.handleNewTransactionSubmit} />
-        <TransactionsTable onSubmit={this.handleEditTransactionSubmit}
-          transactions={this.state.transactions} />
+        {this.state.isLoaded &&
+          <TransactionsTable onSubmit={this.handleEditTransactionSubmit}
+            transactions={this.state.transactions} />
+        }
+        {!this.state.isLoaded &&
+          <div>Loading...</div>
+        }
       </div>
     );
   }

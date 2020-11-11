@@ -571,6 +571,7 @@ var Transactions = function (_React$Component5) {
     var _this6 = _possibleConstructorReturn(this, (Transactions.__proto__ || Object.getPrototypeOf(Transactions)).call(this, props));
 
     _this6.state = {
+      isLoaded: false,
       transactions: null
     };
 
@@ -596,6 +597,7 @@ var Transactions = function (_React$Component5) {
         return response.json();
       }).then(function (data) {
         _this7.setState({
+          isLoaded: true,
           transactions: data.transactions
         });
       }).catch(function (error) {
@@ -640,8 +642,13 @@ var Transactions = function (_React$Component5) {
         "div",
         null,
         React.createElement(NewTransactionForm, { onSubmit: this.handleNewTransactionSubmit }),
-        React.createElement(TransactionsTable, { onSubmit: this.handleEditTransactionSubmit,
-          transactions: this.state.transactions })
+        this.state.isLoaded && React.createElement(TransactionsTable, { onSubmit: this.handleEditTransactionSubmit,
+          transactions: this.state.transactions }),
+        !this.state.isLoaded && React.createElement(
+          "div",
+          null,
+          "Loading..."
+        )
       );
     }
   }]);
