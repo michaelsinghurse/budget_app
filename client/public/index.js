@@ -178,7 +178,35 @@ var NewTransactionForm = function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
+      var _this2 = this;
+
       var errorsList = this.makeErrorsListItems(this.state.errors);
+
+      var categoriesAndAmounts = this.state.categories.map(function (category, index) {
+        return React.createElement(
+          "fieldset",
+          { key: index },
+          React.createElement(
+            "label",
+            null,
+            "Category",
+            React.createElement(SettingsSelect, { name: "categoryId_" + index, id: "categoryId_" + index,
+              value: category.categoryId, onChange: _this2.handleChange })
+          ),
+          React.createElement(
+            "label",
+            null,
+            "Amount",
+            React.createElement("input", { type: "number", name: "amount_" + index, id: "amount_" + index,
+              step: "0.01", value: category.amount, onChange: _this2.handleChange })
+          ),
+          React.createElement(
+            "button",
+            { type: "button" },
+            "Split"
+          )
+        );
+      });
 
       return React.createElement(
         "div",
@@ -187,111 +215,60 @@ var NewTransactionForm = function (_React$Component) {
           "form",
           { noValidate: true, onSubmit: this.handleSubmit },
           React.createElement(
-            "fieldset",
+            "h2",
+            null,
+            "New Transaction"
+          ),
+          React.createElement(
+            "div",
             null,
             React.createElement(
-              "legend",
+              "label",
               null,
-              "New Transaction"
-            ),
-            React.createElement(
-              "dl",
-              null,
-              React.createElement(
-                "dt",
-                null,
-                React.createElement(
-                  "label",
-                  { htmlFor: "date" },
-                  "Date"
-                )
-              ),
-              React.createElement(
-                "dd",
-                null,
-                React.createElement("input", { type: "date", name: "date", id: "date",
-                  value: this.state.date, onChange: this.handleChange })
-              ),
-              React.createElement(
-                "dt",
-                null,
-                React.createElement(
-                  "label",
-                  { htmlFor: "sourceId" },
-                  "Payment Source"
-                )
-              ),
-              React.createElement(
-                "dd",
-                null,
-                React.createElement(SettingsSelect, { name: "sourceId", id: "sourceId", value: this.state.sourceId,
-                  onChange: this.handleChange })
-              ),
-              React.createElement(
-                "dt",
-                null,
-                React.createElement(
-                  "label",
-                  { htmlFor: "payee" },
-                  "Payee"
-                )
-              ),
-              React.createElement(
-                "dd",
-                null,
-                React.createElement("input", { type: "text", name: "payee", id: "payee",
-                  value: this.state.payee, onChange: this.handleChange })
-              ),
-              React.createElement(
-                "dt",
-                null,
-                React.createElement(
-                  "label",
-                  { htmlFor: "categoryId" },
-                  "Category"
-                )
-              ),
-              React.createElement(
-                "dd",
-                null,
-                React.createElement(SettingsSelect, { name: "categoryId", id: "categoryId",
-                  value: this.state.categories[0].categoryId,
-                  onChange: this.handleChange })
-              ),
-              React.createElement(
-                "dt",
-                null,
-                React.createElement(
-                  "label",
-                  { htmlFor: "amount" },
-                  "Amount"
-                )
-              ),
-              React.createElement(
-                "dd",
-                null,
-                React.createElement("input", { type: "number", name: "amount", id: "amount", step: "0.01",
-                  value: this.state.categories[0].amount,
-                  onChange: this.handleChange })
-              ),
-              React.createElement(
-                "dt",
-                null,
-                React.createElement(
-                  "label",
-                  { htmlFor: "notes" },
-                  "Notes"
-                )
-              ),
-              React.createElement(
-                "dd",
-                null,
-                React.createElement("input", { type: "text", name: "notes", id: "notes", value: this.state.notes,
-                  onChange: this.handleChange })
-              )
+              "Date",
+              React.createElement("input", { type: "date", name: "date", id: "date",
+                value: this.state.date, onChange: this.handleChange })
             )
           ),
-          React.createElement("input", { type: "submit", value: "Add" })
+          React.createElement(
+            "div",
+            null,
+            React.createElement(
+              "label",
+              null,
+              "Payment Source",
+              React.createElement(SettingsSelect, { name: "sourceId", id: "sourceId", value: this.state.sourceId,
+                onChange: this.handleChange })
+            )
+          ),
+          React.createElement(
+            "div",
+            null,
+            React.createElement(
+              "label",
+              null,
+              "Payee",
+              React.createElement("input", { type: "text", name: "payee", id: "payee",
+                value: this.state.payee, onChange: this.handleChange })
+            )
+          ),
+          categoriesAndAmounts,
+          React.createElement(
+            "div",
+            null,
+            React.createElement(
+              "label",
+              null,
+              "Notes",
+              React.createElement("input", { type: "text", name: "notes", id: "notes", value: this.state.notes,
+                onChange: this.handleChange })
+            )
+          ),
+          React.createElement(
+            "div",
+            null,
+            React.createElement("input", { type: "submit", value: "Add" })
+          )
         ),
         React.createElement(
           "ul",
@@ -311,10 +288,10 @@ var SettingsSelect = function (_React$Component2) {
   function SettingsSelect(props) {
     _classCallCheck(this, SettingsSelect);
 
-    var _this2 = _possibleConstructorReturn(this, (SettingsSelect.__proto__ || Object.getPrototypeOf(SettingsSelect)).call(this, props));
+    var _this3 = _possibleConstructorReturn(this, (SettingsSelect.__proto__ || Object.getPrototypeOf(SettingsSelect)).call(this, props));
 
-    _this2.handleChange = _this2.handleChange.bind(_this2);
-    return _this2;
+    _this3.handleChange = _this3.handleChange.bind(_this3);
+    return _this3;
   }
 
   _createClass(SettingsSelect, [{
@@ -325,14 +302,20 @@ var SettingsSelect = function (_React$Component2) {
   }, {
     key: "componentDidMount",
     value: function componentDidMount() {
-      var _this3 = this;
+      var _this4 = this;
 
       var URLS = {
         sourceId: "/settings/paymentSources",
         categoryId: "/settings/budgetCategories"
       };
 
-      var url = URLS[this.props.name];
+      var name = this.props.name;
+
+      if (name.includes("_")) {
+        name = name.slice(0, name.indexOf("_"));
+      }
+
+      var url = URLS[name];
 
       fetch(url).then(function (response) {
         if (!response.ok) {
@@ -340,7 +323,7 @@ var SettingsSelect = function (_React$Component2) {
         }
         return response.json();
       }).then(function (data) {
-        _this3.populateSelectOptions(data);
+        _this4.populateSelectOptions(data);
       }).catch(function (error) {
         console.error("Problem with fetch operations:", error);
       });
@@ -386,10 +369,10 @@ var TransactionTableRow = function (_React$Component3) {
   function TransactionTableRow(props) {
     _classCallCheck(this, TransactionTableRow);
 
-    var _this4 = _possibleConstructorReturn(this, (TransactionTableRow.__proto__ || Object.getPrototypeOf(TransactionTableRow)).call(this, props));
+    var _this5 = _possibleConstructorReturn(this, (TransactionTableRow.__proto__ || Object.getPrototypeOf(TransactionTableRow)).call(this, props));
 
-    _this4.handleEditClick = _this4.handleEditClick.bind(_this4);
-    return _this4;
+    _this5.handleEditClick = _this5.handleEditClick.bind(_this5);
+    return _this5;
   }
 
   _createClass(TransactionTableRow, [{
@@ -477,10 +460,10 @@ var TransactionsTable = function (_React$Component4) {
   function TransactionsTable(props) {
     _classCallCheck(this, TransactionsTable);
 
-    var _this5 = _possibleConstructorReturn(this, (TransactionsTable.__proto__ || Object.getPrototypeOf(TransactionsTable)).call(this, props));
+    var _this6 = _possibleConstructorReturn(this, (TransactionsTable.__proto__ || Object.getPrototypeOf(TransactionsTable)).call(this, props));
 
-    _this5.handleSubmit = _this5.handleSubmit.bind(_this5);
-    return _this5;
+    _this6.handleSubmit = _this6.handleSubmit.bind(_this6);
+    return _this6;
   }
 
   _createClass(TransactionsTable, [{
@@ -568,16 +551,16 @@ var Transactions = function (_React$Component5) {
   function Transactions(props) {
     _classCallCheck(this, Transactions);
 
-    var _this6 = _possibleConstructorReturn(this, (Transactions.__proto__ || Object.getPrototypeOf(Transactions)).call(this, props));
+    var _this7 = _possibleConstructorReturn(this, (Transactions.__proto__ || Object.getPrototypeOf(Transactions)).call(this, props));
 
-    _this6.state = {
+    _this7.state = {
       isLoaded: false,
       transactions: null
     };
 
-    _this6.handleEditTransactionSubmit = _this6.handleEditTransactionSubmit.bind(_this6);
-    _this6.handleNewTransactionSubmit = _this6.handleNewTransactionSubmit.bind(_this6);
-    return _this6;
+    _this7.handleEditTransactionSubmit = _this7.handleEditTransactionSubmit.bind(_this7);
+    _this7.handleNewTransactionSubmit = _this7.handleNewTransactionSubmit.bind(_this7);
+    return _this7;
   }
 
   _createClass(Transactions, [{
@@ -588,7 +571,7 @@ var Transactions = function (_React$Component5) {
   }, {
     key: "fetchAllTransactions",
     value: function fetchAllTransactions() {
-      var _this7 = this;
+      var _this8 = this;
 
       fetch("/transactions").then(function (response) {
         if (!response.ok) {
@@ -596,7 +579,7 @@ var Transactions = function (_React$Component5) {
         }
         return response.json();
       }).then(function (data) {
-        _this7.setState({
+        _this8.setState({
           isLoaded: true,
           transactions: data.transactions
         });
@@ -614,7 +597,7 @@ var Transactions = function (_React$Component5) {
   }, {
     key: "handleNewTransactionSubmit",
     value: function handleNewTransactionSubmit(inputs) {
-      var _this8 = this;
+      var _this9 = this;
 
       var init = {
         method: "POST",
@@ -630,7 +613,7 @@ var Transactions = function (_React$Component5) {
         }
         return response.json();
       }).then(function (_data) {
-        return _this8.fetchAllTransactions();
+        return _this9.fetchAllTransactions();
       }).catch(function (error) {
         console.error("Problem with fetch operations:", error);
       });

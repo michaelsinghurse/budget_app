@@ -163,48 +163,63 @@ class NewTransactionForm extends React.Component {
 
   render() {
     const errorsList = this.makeErrorsListItems(this.state.errors);
+    
+    const categoriesAndAmounts = this.state.categories.map((category, index) => {
+      return (
+          <fieldset key={index}>
+            <label>
+              Category
+              <SettingsSelect name={"categoryId_" + index} id={"categoryId_" + index}
+                value={category.categoryId} onChange={this.handleChange} />
+            </label>
+            <label>
+              Amount
+              <input type="number" name={"amount_" + index} id={"amount_" + index} 
+                step="0.01" value={category.amount} onChange={this.handleChange} />
+            </label>
+            <button type="button">Split</button>
+          </fieldset>
+      );
+    });
 
     return (
       <div>
         <form noValidate onSubmit={this.handleSubmit}>
-          <fieldset>
-            <legend>New Transaction</legend>
-            <dl>
-              <dt><label htmlFor="date">Date</label></dt>
-              <dd>
-                <input type="date" name="date" id="date" 
-                  value={this.state.date} onChange={this.handleChange} />
-              </dd>
-              <dt><label htmlFor="sourceId">Payment Source</label></dt>
-              <dd>
-                <SettingsSelect name="sourceId" id="sourceId" value={this.state.sourceId}
-                  onChange={this.handleChange} />
-              </dd>
-              <dt><label htmlFor="payee">Payee</label></dt>
-              <dd>
-                <input type="text" name="payee" id="payee" 
-                  value={this.state.payee} onChange={this.handleChange} />
-              </dd>
-              <dt><label htmlFor="categoryId">Category</label></dt>
-              <dd>
-                <SettingsSelect name="categoryId" id="categoryId" 
-                  value={this.state.categories[0].categoryId}
-                  onChange={this.handleChange} />
-              </dd>
-              <dt><label htmlFor="amount">Amount</label></dt>
-              <dd>
-                <input type="number" name="amount" id="amount" step="0.01" 
-                  value={this.state.categories[0].amount} 
-                  onChange={this.handleChange} />
-              </dd>
-              <dt><label htmlFor="notes">Notes</label></dt>
-              <dd>
-                <input type="text" name="notes" id="notes" value={this.state.notes}
-                  onChange={this.handleChange} />
-              </dd>
-            </dl>
-          </fieldset>
-          <input type="submit" value="Add" />
+          <h2>New Transaction</h2>
+          <div>
+            <label>
+              Date
+              <input type="date" name="date" id="date" 
+                value={this.state.date} onChange={this.handleChange} />
+            </label>
+          </div>
+          <div>
+            <label>
+              Payment Source
+              <SettingsSelect name="sourceId" id="sourceId" value={this.state.sourceId}
+                onChange={this.handleChange} />
+            </label>
+          </div>
+          <div>
+            <label>
+              Payee
+              <input type="text" name="payee" id="payee" 
+                value={this.state.payee} onChange={this.handleChange} />
+            </label>
+          </div>
+
+          {categoriesAndAmounts}
+
+          <div>
+            <label>
+              Notes
+              <input type="text" name="notes" id="notes" value={this.state.notes}
+                onChange={this.handleChange} />
+            </label>
+          </div>
+          <div>
+            <input type="submit" value="Add" />
+          </div>
         </form>
         <ul>
           {errorsList}
@@ -230,8 +245,14 @@ class SettingsSelect extends React.Component {
       sourceId: "/settings/paymentSources",
       categoryId: "/settings/budgetCategories",
     };
+    
+    let name = this.props.name;
 
-    const url = URLS[this.props.name];
+    if (name.includes("_")) {
+      name = name.slice(0, name.indexOf("_"));
+    }
+
+    const url = URLS[name];
 
     fetch(url)
       .then(response => {
