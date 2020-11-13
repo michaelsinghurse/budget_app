@@ -33,18 +33,43 @@ var NewTransactionForm = function (_React$Component) {
         date: "",
         sourceId: "",
         payee: "",
-        categoryId: "",
-        amount: "",
+        categories: [{
+          categoryId: "",
+          amount: ""
+        }],
         notes: ""
       }
     };
 
+    _this.handleAddSplitClick = _this.handleAddSplitClick.bind(_this);
     _this.handleChange = _this.handleChange.bind(_this);
+    _this.handleDeleteSplitClick = _this.handleDeleteSplitClick.bind(_this);
     _this.handleSubmit = _this.handleSubmit.bind(_this);
     return _this;
   }
 
   _createClass(NewTransactionForm, [{
+    key: "handleAddSplitClick",
+    value: function handleAddSplitClick(event) {
+      var categories = this.state.categories;
+      var errors = this.state.errors;
+
+      categories.push({
+        categoryId: "0",
+        amount: ""
+      });
+
+      errors.categories.push({
+        categoryId: "",
+        amount: ""
+      });
+
+      this.setState({
+        categories: categories,
+        errors: errors
+      });
+    }
+  }, {
     key: "handleChange",
     value: function handleChange(event) {
       var _event$target = event.target,
@@ -53,11 +78,14 @@ var NewTransactionForm = function (_React$Component) {
 
       var errors = this.state.errors;
 
-      errors[name] = this.validateElementValue(name, value);
-
-      if (name === "categoryId" || name === "amount") {
+      if (name.includes("categoryId") || name.includes("amount")) {
         var categories = this.state.categories;
-        categories[0][name] = value;
+        var baseName = name.slice(0, name.indexOf("_"));
+        var index = Number(name.slice(name.indexOf("_") + 1));
+
+        categories[index][baseName] = value;
+
+        errors.categories[index][baseName] = this.validateElementValue(baseName, value);
 
         this.setState({
           categories: categories,
@@ -66,8 +94,27 @@ var NewTransactionForm = function (_React$Component) {
       } else {
         var _setState;
 
+        errors[name] = this.validateElementValue(name, value);
+
         this.setState((_setState = {}, _defineProperty(_setState, name, value), _defineProperty(_setState, "errors", errors), _setState));
       }
+    }
+  }, {
+    key: "handleDeleteSplitClick",
+    value: function handleDeleteSplitClick(event) {
+      var id = event.target.id;
+      var categoryIndex = Number(id.slice(id.indexOf("_") + 1));
+
+      var categories = this.state.categories;
+      var errors = this.state.errors;
+
+      categories.splice(categoryIndex, 1);
+      errors.categories.splice(categoryIndex, 1);
+
+      this.setState({
+        categories: categories,
+        errors: errors
+      });
     }
   }, {
     key: "handleSubmit",
@@ -78,18 +125,22 @@ var NewTransactionForm = function (_React$Component) {
       var elements = event.target.elements;
 
       for (var index = 0; index < elements.length; index += 1) {
-        var element = elements[index];
+        var _elements$index = elements[index],
+            name = _elements$index.name,
+            value = _elements$index.value;
 
-        if (!this.state.hasOwnProperty(element.name) && !this.state.categories.hasOwnProperty(element.name)) {
-          continue;
+
+        if (name.includes("categoryId") || name.includes("amount")) {
+          var baseName = name.slice(0, name.indexOf("_"));
+          var _index = Number(name.slice(name.indexOf("_") + 1));
+
+          errors.categories[_index][baseName] = this.validateElementValue(baseName, value);
+        } else if (this.state.hasOwnProperty(name)) {
+          errors[name] = this.validateElementValue(name, value);
         }
-
-        errors[element.name] = this.validateElementValue(element.name, element.value);
       }
 
-      if (Object.values(errors).some(function (errorMessage) {
-        return errorMessage.length > 0;
-      })) {
+      if (this.hasErrorMessage(errors)) {
         this.setState({ errors: errors });
         return;
       }
@@ -98,10 +149,7 @@ var NewTransactionForm = function (_React$Component) {
         date: this.state.date,
         sourceId: this.state.sourceId,
         payee: this.state.payee,
-        categories: [{
-          categoryId: this.state.categories[0].categoryId,
-          amount: this.state.categories[0].amount
-        }],
+        categories: this.state.categories,
         notes: this.state.notes
       });
 
@@ -117,21 +165,59 @@ var NewTransactionForm = function (_React$Component) {
       });
     }
   }, {
+    key: "hasErrorMessage",
+    value: function hasErrorMessage(errorsObject) {
+      for (var key in errorsObject) {
+        if (key === "categories") {
+          for (var index = 0; index < errorsObject.categories.length; index += 1) {
+            var category = errorsObject.categories[index];
+            for (var key2 in category) {
+              if (category[key2] !== "") {
+                return true;
+              }
+            }
+          }
+        } else {
+          if (errorsObject[key] !== "") {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+  }, {
     key: "makeErrorsListItems",
     value: function makeErrorsListItems(errorsObject) {
       var listItems = [];
 
       for (var key in errorsObject) {
-        var value = errorsObject[key];
+        if (key === "categories") {
+          errorsObject[key].forEach(function (category, index) {
+            for (var key2 in category) {
+              var value = category[key2];
+              if (value) {
+                listItems.push(React.createElement(
+                  "li",
+                  { key: key2 + "_" + index },
+                  "\u26A0 " + value + " (category-amount " + index + ")"
+                ));
+              }
+            }
+          });
+        } else {
+          var value = errorsObject[key];
 
-        if (value) {
-          listItems.push(React.createElement(
-            "li",
-            { key: key },
-            "\u26A0" + value
-          ));
+          if (value) {
+            listItems.push(React.createElement(
+              "li",
+              { key: key },
+              "\u26A0" + value
+            ));
+          }
         }
       }
+
       return listItems;
     }
   }, {
@@ -200,10 +286,16 @@ var NewTransactionForm = function (_React$Component) {
             React.createElement("input", { type: "number", name: "amount_" + index, id: "amount_" + index,
               step: "0.01", value: category.amount, onChange: _this2.handleChange })
           ),
-          React.createElement(
+          index === 0 && React.createElement(
             "button",
-            { type: "button" },
+            { type: "button", onClick: _this2.handleAddSplitClick },
             "Split"
+          ),
+          index > 0 && React.createElement(
+            "button",
+            { type: "button", id: "deleteSplit_" + index,
+              onClick: _this2.handleDeleteSplitClick },
+            "Delete"
           )
         );
       });

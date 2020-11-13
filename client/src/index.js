@@ -19,36 +19,81 @@ class NewTransactionForm extends React.Component {
         date: "",
         sourceId: "",
         payee: "",
-        categoryId: "",
-        amount: "",
+        categories: [{
+          categoryId: "",
+          amount: "",
+        }],
         notes: "",
       },
     };
 
+    this.handleAddSplitClick = this.handleAddSplitClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.handleDeleteSplitClick = this.handleDeleteSplitClick.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
-  
+
+  handleAddSplitClick(event) {
+    const categories = this.state.categories;
+    const errors = this.state.errors;
+
+    categories.push({
+      categoryId: "0",
+      amount: "",
+    });
+
+    errors.categories.push({
+      categoryId: "",
+      amount: "",
+    });
+
+    this.setState({ 
+      categories,
+      errors, 
+    });
+  }
+
   handleChange(event) {
     const { name, value } = event.target;
     const errors = this.state.errors;
 
-    errors[name] = this.validateElementValue(name, value);
-
-    if (name === "categoryId" || name === "amount") {
+    if (name.includes("categoryId") || name.includes("amount")) {
       const categories = this.state.categories;
-      categories[0][name] = value;
+      const baseName = name.slice(0, name.indexOf("_"));
+      const index = Number(name.slice(name.indexOf("_") + 1));
+
+      categories[index][baseName] = value;
       
+      errors.categories[index][baseName] = this.validateElementValue(baseName, value);
+
       this.setState({
         categories,   
         errors,
       });
     } else {
+      errors[name] = this.validateElementValue(name, value);
+
       this.setState({
         [name]: value,
         errors,
       });
     }
+  }
+  
+  handleDeleteSplitClick(event) {
+    const id = event.target.id;
+    const categoryIndex = Number(id.slice(id.indexOf("_") + 1));
+
+    const categories = this.state.categories;
+    const errors = this.state.errors;
+
+    categories.splice(categoryIndex, 1);
+    errors.categories.splice(categoryIndex, 1);
+
+    this.setState({
+      categories,
+      errors,
+    });
   }
 
   handleSubmit(event) {
@@ -58,19 +103,20 @@ class NewTransactionForm extends React.Component {
     const elements = event.target.elements;
 
     for (let index = 0; index < elements.length; index += 1) {
-      const element = elements[index];
+      const { name, value } = elements[index];
+      
+      if (name.includes("categoryId") || name.includes("amount")) {
+        const baseName = name.slice(0, name.indexOf("_"));
+        const index = Number(name.slice(name.indexOf("_") + 1));
 
-      if (
-        !this.state.hasOwnProperty(element.name) && 
-        !this.state.categories.hasOwnProperty(element.name)
-      ) {
-        continue;
+        errors.categories[index][baseName] = this.validateElementValue(baseName, value);
+
+      } else if (this.state.hasOwnProperty(name)) {
+        errors[name] = this.validateElementValue(name, value);
       }
-
-      errors[element.name] = this.validateElementValue(element.name, element.value);
     }
     
-    if (Object.values(errors).some(errorMessage => errorMessage.length > 0)) {
+    if (this.hasErrorMessage(errors)) { 
       this.setState({ errors });
       return;
     }
@@ -79,10 +125,7 @@ class NewTransactionForm extends React.Component {
       date: this.state.date,
       sourceId: this.state.sourceId,
       payee: this.state.payee,
-      categories: [{
-        categoryId: this.state.categories[0].categoryId,
-        amount: this.state.categories[0].amount,
-      }],
+      categories: this.state.categories,
       notes: this.state.notes,
     });
 
@@ -97,17 +140,52 @@ class NewTransactionForm extends React.Component {
       notes: "",
     });
   }
+
+  hasErrorMessage(errorsObject) {
+    for (let key in errorsObject) {
+      if (key === "categories") {
+        for (let index = 0; index < errorsObject.categories.length; index += 1) {
+          const category = errorsObject.categories[index];
+          for (let key2 in category) {
+            if (category[key2] !== "") {
+              return true;
+            }
+          }
+        }
+      } else {
+        if (errorsObject[key] !== "") {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
   
   makeErrorsListItems(errorsObject) {
     const listItems = [];
 
     for (let key in errorsObject) {
-      const value = errorsObject[key];
+      if (key === "categories") {
+        errorsObject[key].forEach((category, index) => {
+          for (let key2 in category) {
+            const value = category[key2];
+            if (value) {
+              listItems.push(<li key={key2 + "_" + index}>
+                {`\u26a0 ${value} (category-amount ${index})`}
+              </li>);
+            }
+          }
+        });
+      } else {
+        const value = errorsObject[key];
 
-      if (value) {
-        listItems.push(<li key={key}>{"\u26a0" + value}</li>);
+        if (value) {
+          listItems.push(<li key={key}>{"\u26a0" + value}</li>);
+        }
       }
     }
+
     return listItems;
   }
 
@@ -166,19 +244,25 @@ class NewTransactionForm extends React.Component {
     
     const categoriesAndAmounts = this.state.categories.map((category, index) => {
       return (
-          <fieldset key={index}>
-            <label>
-              Category
-              <SettingsSelect name={"categoryId_" + index} id={"categoryId_" + index}
-                value={category.categoryId} onChange={this.handleChange} />
-            </label>
-            <label>
-              Amount
-              <input type="number" name={"amount_" + index} id={"amount_" + index} 
-                step="0.01" value={category.amount} onChange={this.handleChange} />
-            </label>
-            <button type="button">Split</button>
-          </fieldset>
+        <fieldset key={index}>
+          <label>
+            Category
+            <SettingsSelect name={"categoryId_" + index} id={"categoryId_" + index}
+              value={category.categoryId} onChange={this.handleChange} />
+          </label>
+          <label>
+            Amount
+            <input type="number" name={"amount_" + index} id={"amount_" + index} 
+              step="0.01" value={category.amount} onChange={this.handleChange} />
+          </label>
+          {index === 0 &&
+            <button type="button" onClick={this.handleAddSplitClick}>Split</button>
+          }
+          {index > 0 &&
+            <button type="button" id={"deleteSplit_" + index} 
+              onClick={this.handleDeleteSplitClick}>Delete</button>
+          }
+        </fieldset>
       );
     });
 
